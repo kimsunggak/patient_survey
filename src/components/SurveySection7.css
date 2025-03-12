@@ -1,0 +1,141 @@
+/* 결과 페이지 스타일 */
+
+.result-table-container {
+  margin: 3rem 0;
+}
+
+.result-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1.5rem;
+  font-size: 1.3rem;
+}
+
+.result-table th, .result-table td {
+  border: 1px solid #ddd;
+  padding: 1rem;
+  text-align: center;
+}
+
+.result-table th {
+  background-color: #f4f6f8;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.result-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.result-table tr:hover {
+  background-color: #f1f7fb;
+}
+
+/* 상태별 색상 */
+.status-매우-양호 {
+  color: #27ae60;
+  font-weight: 700;
+}
+
+.status-양호 {
+  color: #2980b9;
+  font-weight: 700;
+}
+
+.status-보통 {
+  color: #f39c12;
+  font-weight: 700;
+}
+
+.status-주의-필요 {
+  color: #e74c3c;
+  font-weight: 700;
+}
+
+/* 차트 스타일 */
+.result-chart {
+  margin: 3rem 0;
+}
+
+.bar-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  margin-top: 2rem;
+}
+
+.chart-row {
+  display: flex;
+  align-items: center;
+}
+
+.chart-label {
+  width: 100px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.chart-bar-container {
+  flex-grow: 1;
+  background-color: #f1f1f1;
+  border-radius: 8px;
+  height: 35px;
+  position: relative;
+}
+
+.chart-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #3498db, #2980b9);
+  border-radius: 8px;
+  position: relative;
+}
+
+.chart-bar::after {
+  content: attr(data-percentage);
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: white;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+/* 인쇄 버튼 */
+.print-button {
+  background-color: #2ecc71;
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 5px;
+  font-size: 1.3rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-right: 1rem;
+}
+
+.print-button:hover {
+  background-color: #27ae60;
+}
+
+/* 인쇄를 위한 미디어 쿼리 */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .survey-container, .survey-container * {
+    visibility: visible;
+  }
+  .survey-container {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    background: white !important;
+    box-shadow: none !important;
+  }
+  .navigation-buttons {
+    display: none !important;
+  }
+}

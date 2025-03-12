@@ -1,0 +1,21 @@
+/* 섹션 3에 대한 추가 스타일 */
+.survey-container .question-item .question {
+  font-size: 1.65rem !important;
+  line-height: 1.4;
+  margin-bottom: 1.5rem;
+}
+
+.survey-container .radio-group label {
+  font-size: 1.35rem !important;
+  padding: 0.5rem 0;
+}
+
+.survey-container .radio-group input[type="radio"] {
+  width: 22px;
+  height: 22px;
+}
+
+.survey-container .navigation-buttons button {
+  font-size: 1.3rem;
+  padding: 0.8rem 2rem;
+}

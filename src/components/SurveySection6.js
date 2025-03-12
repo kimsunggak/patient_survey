@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './SurveySection1.css';
+import './SurveySection3.css';  // 공통 CSS 추가
 
 const SurveySection6 = () => {
   const navigate = useNavigate();
@@ -9,6 +10,8 @@ const SurveySection6 = () => {
     question1: '',
     question2: '',
     question3: '',
+    question4: '',
+    question5: '',
   });
 
   useEffect(() => {
@@ -40,7 +43,7 @@ const SurveySection6 = () => {
     <div className="survey-container">
       <div className="survey-header">
         <h1>설문조사: 섹션 6</h1>
-        <p>의료 정보 및 관리</p>
+        <p>암 이후 탄력성 및 미래 계획</p>
         <div className="patient-info-summary">
           <p><strong>{patientInfo.name}</strong>님의 설문조사입니다.</p>
         </div>
@@ -48,7 +51,7 @@ const SurveySection6 = () => {
 
       <form onSubmit={handleSubmit} className="survey-form">
         <div className="question-item">
-          <p className="question">1. 퇴원 후 정기적으로 병원에 방문할 계획이 있으십니까?</p>
+          <p className="question">29. 암 치료가 끝났지만, 여전히 건강관리는 중요하다.</p>
           <div className="radio-group">
             <label>
               <input 
@@ -58,7 +61,7 @@ const SurveySection6 = () => {
                 onChange={handleChange} 
                 required 
               />
-              매우 그렇다 (구체적인 일정이 있음)
+              매우 그렇다
             </label>
             <label>
               <input 
@@ -67,7 +70,7 @@ const SurveySection6 = () => {
                 value="4" 
                 onChange={handleChange} 
               />
-              그렇다 (대략적인 일정이 있음)
+              약간 그렇다
             </label>
             <label>
               <input 
@@ -85,7 +88,7 @@ const SurveySection6 = () => {
                 value="2" 
                 onChange={handleChange} 
               />
-              그렇지 않다 (계획이 불확실함)
+              약간 그렇지 않다
             </label>
             <label>
               <input 
@@ -94,13 +97,13 @@ const SurveySection6 = () => {
                 value="1" 
                 onChange={handleChange} 
               />
-              매우 그렇지 않다 (계획이 전혀 없음)
+              전혀 그렇지 않다
             </label>
           </div>
         </div>
 
         <div className="question-item">
-          <p className="question">2. 귀하의 질병과 치료에 대해 얼마나 잘 이해하고 있습니까?</p>
+          <p className="question">30. 나는 암을 잘 견뎌냈다는 자신감이 있다.</p>
           <div className="radio-group">
             <label>
               <input 
@@ -110,7 +113,7 @@ const SurveySection6 = () => {
                 onChange={handleChange} 
                 required 
               />
-              매우 잘 이해함
+              매우 그렇다
             </label>
             <label>
               <input 
@@ -119,7 +122,7 @@ const SurveySection6 = () => {
                 value="4" 
                 onChange={handleChange} 
               />
-              잘 이해함
+              약간 그렇다
             </label>
             <label>
               <input 
@@ -128,7 +131,7 @@ const SurveySection6 = () => {
                 value="3" 
                 onChange={handleChange} 
               />
-              보통
+              보통이다
             </label>
             <label>
               <input 
@@ -137,7 +140,7 @@ const SurveySection6 = () => {
                 value="2" 
                 onChange={handleChange} 
               />
-              잘 이해하지 못함
+              약간 그렇지 않다
             </label>
             <label>
               <input 
@@ -146,13 +149,13 @@ const SurveySection6 = () => {
                 value="1" 
                 onChange={handleChange} 
               />
-              전혀 이해하지 못함
+              전혀 그렇지 않다
             </label>
           </div>
         </div>
 
         <div className="question-item">
-          <p className="question">3. 건강 관리를 위한 식이요법에 대해 얼마나 잘 알고 있습니까?</p>
+          <p className="question">31. 암 발병 후, 내 인생을 긍정적으로 보고 있다.</p>
           <div className="radio-group">
             <label>
               <input 
@@ -162,7 +165,7 @@ const SurveySection6 = () => {
                 onChange={handleChange} 
                 required 
               />
-              매우 잘 알고 있음
+              매우 그렇다
             </label>
             <label>
               <input 
@@ -171,7 +174,7 @@ const SurveySection6 = () => {
                 value="4" 
                 onChange={handleChange} 
               />
-              잘 알고 있음
+              약간 그렇다
             </label>
             <label>
               <input 
@@ -180,7 +183,7 @@ const SurveySection6 = () => {
                 value="3" 
                 onChange={handleChange} 
               />
-              보통
+              보통이다
             </label>
             <label>
               <input 
@@ -189,7 +192,7 @@ const SurveySection6 = () => {
                 value="2" 
                 onChange={handleChange} 
               />
-              잘 모름
+              약간 그렇지 않다
             </label>
             <label>
               <input 
@@ -198,14 +201,120 @@ const SurveySection6 = () => {
                 value="1" 
                 onChange={handleChange} 
               />
-              전혀 모름
+              전혀 그렇지 않다
+            </label>
+          </div>
+        </div>
+
+        {/* 추가된 질문 4 */}
+        <div className="question-item">
+          <p className="question">32. 퇴원 후 삶의 목표가 있다.</p>
+          <div className="radio-group">
+            <label>
+              <input 
+                type="radio" 
+                name="question4" 
+                value="5" 
+                onChange={handleChange} 
+                required 
+              />
+              매우 그렇다
+            </label>
+            <label>
+              <input 
+                type="radio" 
+                name="question4" 
+                value="4" 
+                onChange={handleChange} 
+              />
+              약간 그렇다
+            </label>
+            <label>
+              <input 
+                type="radio" 
+                name="question4" 
+                value="3" 
+                onChange={handleChange} 
+              />
+              보통이다
+            </label>
+            <label>
+              <input 
+                type="radio" 
+                name="question4" 
+                value="2" 
+                onChange={handleChange} 
+              />
+              약간 그렇지 않다
+            </label>
+            <label>
+              <input 
+                type="radio" 
+                name="question4" 
+                value="1" 
+                onChange={handleChange} 
+              />
+              전혀 그렇지 않다
+            </label>
+          </div>
+        </div>
+
+        {/* 추가된 질문 5 */}
+        <div className="question-item">
+          <p className="question">33. 향후 건강과 관련하여 긍정적인 변화를 만들 준비가 되어 있다.</p>
+          <div className="radio-group">
+            <label>
+              <input 
+                type="radio" 
+                name="question5" 
+                value="5" 
+                onChange={handleChange} 
+                required 
+              />
+              매우 그렇다
+            </label>
+            <label>
+              <input 
+                type="radio" 
+                name="question5" 
+                value="4" 
+                onChange={handleChange} 
+              />
+              약간 그렇다
+            </label>
+            <label>
+              <input 
+                type="radio" 
+                name="question5" 
+                value="3" 
+                onChange={handleChange} 
+              />
+              보통이다
+            </label>
+            <label>
+              <input 
+                type="radio" 
+                name="question5" 
+                value="2" 
+                onChange={handleChange} 
+              />
+              약간 그렇지 않다
+            </label>
+            <label>
+              <input 
+                type="radio" 
+                name="question5" 
+                value="1" 
+                onChange={handleChange} 
+              />
+              전혀 그렇지 않다
             </label>
           </div>
         </div>
 
         <div className="navigation-buttons">
           <button type="button" onClick={() => navigate('/survey/section5')} className="back-button">이전</button>
-          <button type="submit" className="next-button">다음</button>
+          <button type="submit" className="next-button">설문 제출하기</button>
         </div>
       </form>
     </div>

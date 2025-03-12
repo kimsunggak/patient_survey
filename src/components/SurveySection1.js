@@ -11,6 +11,9 @@ const SurveySection1 = () => {
     question3: '',
     question4: '',
     question5: '',
+    question6: '',
+    question7: '',
+    question8: '',
   });
 
   useEffect(() => {
@@ -56,7 +59,7 @@ const SurveySection1 = () => {
 
       <form onSubmit={handleSubmit} className="survey-form">
         <div className="question-item">
-          <p className="question">1. 현재 귀하의 건강 상태는 어떻습니까?</p>
+          <p className="question">1. 암 발병 전과 비교해서 무언가에 집중하기 어렵다.</p>
           <div className="radio-group">
             <label>
               <input 
@@ -66,7 +69,7 @@ const SurveySection1 = () => {
                 onChange={handleChange} 
                 required 
               />
-              매우 좋음
+              매우 그렇다
             </label>
             <label>
               <input 
@@ -75,7 +78,7 @@ const SurveySection1 = () => {
                 value="4" 
                 onChange={handleChange} 
               />
-              좋음
+              약간 그렇다
             </label>
             <label>
               <input 
@@ -84,7 +87,7 @@ const SurveySection1 = () => {
                 value="3" 
                 onChange={handleChange} 
               />
-              보통
+              보통이다
             </label>
             <label>
               <input 
@@ -93,7 +96,7 @@ const SurveySection1 = () => {
                 value="2" 
                 onChange={handleChange} 
               />
-              나쁨
+              약간 그렇지 않다
             </label>
             <label>
               <input 
@@ -102,13 +105,13 @@ const SurveySection1 = () => {
                 value="1" 
                 onChange={handleChange} 
               />
-              매우 나쁨
+              전혀 그렇지 않다
             </label>
           </div>
         </div>
 
         <div className="question-item">
-          <p className="question">2. 일상생활에서 도움 없이 활동할 수 있습니까?</p>
+          <p className="question">2. 암 발병 전과 비교해서 무언가를 기억하는데 어려움이 있다.</p>
           <div className="radio-group">
             <label>
               <input 
@@ -118,7 +121,7 @@ const SurveySection1 = () => {
                 onChange={handleChange} 
                 required 
               />
-              완전히 독립적으로 가능함
+              매우 그렇다
             </label>
             <label>
               <input 
@@ -127,7 +130,7 @@ const SurveySection1 = () => {
                 value="4" 
                 onChange={handleChange} 
               />
-              대부분 독립적으로 가능함
+              약간 그렇다
             </label>
             <label>
               <input 
@@ -136,7 +139,7 @@ const SurveySection1 = () => {
                 value="3" 
                 onChange={handleChange} 
               />
-              부분적으로 도움이 필요함
+              보통이다
             </label>
             <label>
               <input 
@@ -145,7 +148,7 @@ const SurveySection1 = () => {
                 value="2" 
                 onChange={handleChange} 
               />
-              상당한 도움이 필요함
+              약간 그렇지 않다
             </label>
             <label>
               <input 
@@ -154,13 +157,13 @@ const SurveySection1 = () => {
                 value="1" 
                 onChange={handleChange} 
               />
-              전적으로 도움이 필요함
+              전혀 그렇지 않다
             </label>
           </div>
         </div>
 
         <div className="question-item">
-          <p className="question">3. 퇴원 후 귀하의 건강 관리에 대해 얼마나 자신이 있습니까?</p>
+          <p className="question">3. 암 발병 전과 비교해서 성생활에 어려움을 느낀다.</p>
           <div className="radio-group">
             <label>
               <input 
@@ -170,7 +173,7 @@ const SurveySection1 = () => {
                 onChange={handleChange} 
                 required 
               />
-              매우 자신 있음
+              매우 그렇다
             </label>
             <label>
               <input 
@@ -179,7 +182,7 @@ const SurveySection1 = () => {
                 value="4" 
                 onChange={handleChange} 
               />
-              자신 있음
+              약간 그렇다
             </label>
             <label>
               <input 
@@ -188,7 +191,7 @@ const SurveySection1 = () => {
                 value="3" 
                 onChange={handleChange} 
               />
-              보통
+              보통이다
             </label>
             <label>
               <input 
@@ -197,7 +200,7 @@ const SurveySection1 = () => {
                 value="2" 
                 onChange={handleChange} 
               />
-              자신 없음
+              약간 그렇지 않다
             </label>
             <label>
               <input 
@@ -206,7 +209,267 @@ const SurveySection1 = () => {
                 value="1" 
                 onChange={handleChange} 
               />
-              매우 자신 없음
+              전혀 그렇지 않다
+            </label>
+          </div>
+        </div>
+
+        <div className="question-item">
+          <p className="question">4. 암 치료 이후 현재 우울감을 느낀다.</p>
+          <div className="radio-group">
+            <label>
+              <input 
+                type="radio" 
+                name="question4" 
+                value="5" 
+                onChange={handleChange} 
+                required 
+              />
+              매우 그렇다
+            </label>
+            <label>
+              <input 
+                type="radio" 
+                name="question4" 
+                value="4" 
+                onChange={handleChange} 
+              />
+              약간 그렇다
+            </label>
+            <label>
+              <input 
+                type="radio" 
+                name="question4" 
+                value="3" 
+                onChange={handleChange} 
+              />
+              보통이다
+            </label>
+            <label>
+              <input 
+                type="radio" 
+                name="question4" 
+                value="2" 
+                onChange={handleChange} 
+              />
+              약간 그렇지 않다
+            </label>
+            <label>
+              <input 
+                type="radio" 
+                name="question4" 
+                value="1" 
+                onChange={handleChange} 
+              />
+              전혀 그렇지 않다
+            </label>
+          </div>
+        </div>
+
+        <div className="question-item">
+          <p className="question">5. 암 발병 이후, 수면에 어려움이 있다.</p>
+          <div className="radio-group">
+            <label>
+              <input 
+                type="radio" 
+                name="question5" 
+                value="5" 
+                onChange={handleChange} 
+                required 
+              />
+              매우 그렇다
+            </label>
+            <label>
+              <input 
+                type="radio" 
+                name="question5" 
+                value="4" 
+                onChange={handleChange} 
+              />
+              약간 그렇다
+            </label>
+            <label>
+              <input 
+                type="radio" 
+                name="question5" 
+                value="3" 
+                onChange={handleChange} 
+              />
+              보통이다
+            </label>
+            <label>
+              <input 
+                type="radio" 
+                name="question5" 
+                value="2" 
+                onChange={handleChange} 
+              />
+              약간 그렇지 않다
+            </label>
+            <label>
+              <input 
+                type="radio" 
+                name="question5" 
+                value="1" 
+                onChange={handleChange} 
+              />
+              전혀 그렇지 않다
+            </label>
+          </div>
+        </div>
+
+        <div className="question-item">
+          <p className="question">6. 암 치료로 인해 일상생활에 불편함(예: 부종, 경직 등)을 느낀다.</p>
+          <div className="radio-group">
+            <label>
+              <input 
+                type="radio" 
+                name="question6" 
+                value="5" 
+                onChange={handleChange} 
+                required 
+              />
+              매우 그렇다
+            </label>
+            <label>
+              <input 
+                type="radio" 
+                name="question6" 
+                value="4" 
+                onChange={handleChange} 
+              />
+              약간 그렇다
+            </label>
+            <label>
+              <input 
+                type="radio" 
+                name="question6" 
+                value="3" 
+                onChange={handleChange} 
+              />
+              보통이다
+            </label>
+            <label>
+              <input 
+                type="radio" 
+                name="question6" 
+                value="2" 
+                onChange={handleChange} 
+              />
+              약간 그렇지 않다
+            </label>
+            <label>
+              <input 
+                type="radio" 
+                name="question6" 
+                value="1" 
+                onChange={handleChange} 
+              />
+              전혀 그렇지 않다
+            </label>
+          </div>
+        </div>
+
+        <div className="question-item">
+          <p className="question">7. 체력 저하로 인해 피로감을 느낀다.</p>
+          <div className="radio-group">
+            <label>
+              <input 
+                type="radio" 
+                name="question7" 
+                value="5" 
+                onChange={handleChange} 
+                required 
+              />
+              매우 그렇다
+            </label>
+            <label>
+              <input 
+                type="radio" 
+                name="question7" 
+                value="4" 
+                onChange={handleChange} 
+              />
+              약간 그렇다
+            </label>
+            <label>
+              <input 
+                type="radio" 
+                name="question7" 
+                value="3" 
+                onChange={handleChange} 
+              />
+              보통이다
+            </label>
+            <label>
+              <input 
+                type="radio" 
+                name="question7" 
+                value="2" 
+                onChange={handleChange} 
+              />
+              약간 그렇지 않다
+            </label>
+            <label>
+              <input 
+                type="radio" 
+                name="question7" 
+                value="1" 
+                onChange={handleChange} 
+              />
+              전혀 그렇지 않다
+            </label>
+          </div>
+        </div>
+
+        <div className="question-item">
+          <p className="question">8. 암 발병 전과 비교해서 적정 체중을 유지하기 어렵다.</p>
+          <div className="radio-group">
+            <label>
+              <input 
+                type="radio" 
+                name="question8" 
+                value="5" 
+                onChange={handleChange} 
+                required 
+              />
+              매우 그렇다
+            </label>
+            <label>
+              <input 
+                type="radio" 
+                name="question8" 
+                value="4" 
+                onChange={handleChange} 
+              />
+              약간 그렇다
+            </label>
+            <label>
+              <input 
+                type="radio" 
+                name="question8" 
+                value="3" 
+                onChange={handleChange} 
+              />
+              보통이다
+            </label>
+            <label>
+              <input 
+                type="radio" 
+                name="question8" 
+                value="2" 
+                onChange={handleChange} 
+              />
+              약간 그렇지 않다
+            </label>
+            <label>
+              <input 
+                type="radio" 
+                name="question8" 
+                value="1" 
+                onChange={handleChange} 
+              />
+              전혀 그렇지 않다
             </label>
           </div>
         </div>

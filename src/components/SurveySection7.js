@@ -1,41 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './SurveySection1.css';
+import './SurveySection3.css';
+import './SurveySection7.css'; // 결과 페이지용 추가 스타일
 
 const SurveySection7 = () => {
   const navigate = useNavigate();
   const [patientInfo, setPatientInfo] = useState(null);
-  const [answers, setAnswers] = useState({
-    question1: '',
-    question2: '',
-    question3: '',
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [surveyCompleted, setSurveyCompleted] = useState(false);
   const [surveyResult, setSurveyResult] = useState({
     totalScore: 0,
     message: '',
-    recommendations: []
+    recommendations: [],
+    sectionScores: {} // 섹션별 점수 추가
   });
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const storedPatientInfo = localStorage.getItem('patientInfo');
     if (storedPatientInfo) {
       setPatientInfo(JSON.parse(storedPatientInfo));
+      // 페이지 로드 시 즉시 결과 계산
+      calculateAndSetResults();
     } else {
       navigate('/');
     }
   }, [navigate]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setAnswers({
-      ...answers,
-      [name]: value,
-    });
-  };
-
-  const calculateResults = () => {
+  const calculateAndSetResults = () => {
     // 모든 섹션의 답변 가져오기
     const section1 = JSON.parse(localStorage.getItem('surveySection1') || '{}');
     const section2 = JSON.parse(localStorage.getItem('surveySection2') || '{}');
@@ -43,22 +34,42 @@ const SurveySection7 = () => {
     const section4 = JSON.parse(localStorage.getItem('surveySection4') || '{}');
     const section5 = JSON.parse(localStorage.getItem('surveySection5') || '{}');
     const section6 = JSON.parse(localStorage.getItem('surveySection6') || '{}');
-    const section7 = answers;
 
-    // 모든 답변의 값을 숫자로 변환하여 합산
-    const allAnswers = [
-      ...Object.values(section1),
-      ...Object.values(section2),
-      ...Object.values(section3),
-      ...Object.values(section4),
-      ...Object.values(section5),
-      ...Object.values(section6),
-      ...Object.values(section7)
-    ].map(val => parseInt(val) || 0);
+    // 섹션별 답변 객체 생성
+    const sectionAnswers = {
+      '섹션 1: 암 이후 내 몸의 변화': Object.values(section1).map(val => parseInt(val) || 0),
+      '섹션 2: 건강한 삶을 위한 관리': Object.values(section2).map(val => parseInt(val) || 0).filter(val => !isNaN(val)),
+      '섹션 3: 회복하도록 도와주는 사람들': Object.values(section3).map(val => parseInt(val) || 0),
+      '섹션 4: 심리적 부담': Object.values(section4).map(val => parseInt(val) || 0),
+      '섹션 5: 사회적 삶의 부담': Object.values(section5).map(val => parseInt(val) || 0),
+      '섹션 6: 암 이후 탄력성 및 미래 계획': Object.values(section6).map(val => parseInt(val) || 0)
+    };
 
-    const totalScore = allAnswers.reduce((sum, val) => sum + val, 0);
-    const maxPossibleScore = allAnswers.length * 5; // 각 질문당 최대 점수는 5점
-    const percentageScore = (totalScore / maxPossibleScore) * 100;
+    // 섹션별 점수 계산
+    const sectionScores = {};
+    let totalPoints = 0;
+    let totalMaxPoints = 0;
+    
+    for (const [section, answers] of Object.entries(sectionAnswers)) {
+      const validAnswers = answers.filter(val => val > 0); // 0이 아닌 유효한 답변만
+      if (validAnswers.length > 0) {
+        const sectionTotal = validAnswers.reduce((sum, val) => sum + val, 0);
+        const sectionMax = validAnswers.length * 5;
+        const sectionPercentage = (sectionTotal / sectionMax) * 100;
+        
+        sectionScores[section] = {
+          score: sectionTotal,
+          maxPossible: sectionMax,
+          percentage: sectionPercentage.toFixed(1)
+        };
+        
+        totalPoints += sectionTotal;
+        totalMaxPoints += sectionMax;
+      }
+    }
+
+    // 전체 점수 계산
+    const percentageScore = totalMaxPoints > 0 ? (totalPoints / totalMaxPoints) * 100 : 0;
 
     // 결과 메시지 및 권장사항 설정
     let message = '';
@@ -101,234 +112,101 @@ const SurveySection7 = () => {
       ];
     }
 
-    return {
+    // 결과 설정
+    setSurveyResult({
       totalScore: percentageScore.toFixed(1),
       message,
-      recommendations
-    };
+      recommendations,
+      sectionScores
+    });
+    
+    setIsLoading(false);
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    
-    // 답변 저장
-    localStorage.setItem('surveySection7', JSON.stringify(answers));
-    
-    // 결과 계산
-    const results = calculateResults();
-    setSurveyResult(results);
-    setSurveyCompleted(true);
-    setIsSubmitting(false);
-  };
-
-  if (!patientInfo) return <div className="loading">로딩 중...</div>;
+  if (isLoading || !patientInfo) return <div className="loading">결과 분석 중...</div>;
 
   return (
     <div className="survey-container">
-      {!surveyCompleted ? (
-        <>
-          <div className="survey-header">
-            <h1>설문조사: 섹션 7</h1>
-            <p>미래 계획 및 목표</p>
-            <div className="patient-info-summary">
-              <p><strong>{patientInfo.name}</strong>님의 설문조사입니다.</p>
-            </div>
-          </div>
+      <div className="survey-result">
+        <h1>설문조사 결과</h1>
+        <div className="patient-info-summary">
+          <p><strong>{patientInfo.name}</strong>님의 설문조사 결과입니다.</p>
+        </div>
 
-          <form onSubmit={handleSubmit} className="survey-form">
-            <div className="question-item">
-              <p className="question">1. 퇴원 후 삶의 목표가 있으십니까?</p>
-              <div className="radio-group">
-                <label>
-                  <input 
-                    type="radio" 
-                    name="question1" 
-                    value="5" 
-                    onChange={handleChange} 
-                    required 
-                  />
-                  매우 구체적인 목표가 있음
-                </label>
-                <label>
-                  <input 
-                    type="radio" 
-                    name="question1" 
-                    value="4" 
-                    onChange={handleChange} 
-                  />
-                  목표가 있음
-                </label>
-                <label>
-                  <input 
-                    type="radio" 
-                    name="question1" 
-                    value="3" 
-                    onChange={handleChange} 
-                  />
-                  보통
-                </label>
-                <label>
-                  <input 
-                    type="radio" 
-                    name="question1" 
-                    value="2" 
-                    onChange={handleChange} 
-                  />
-                  모호한 목표만 있음
-                </label>
-                <label>
-                  <input 
-                    type="radio" 
-                    name="question1" 
-                    value="1" 
-                    onChange={handleChange} 
-                  />
-                  목표가 전혀 없음
-                </label>
+        <div className="result-score">
+          <h2>종합 점수: <span className="score-value">{surveyResult.totalScore}%</span></h2>
+          <p className="result-message">상태: <strong>{surveyResult.message}</strong></p>
+        </div>
+
+        {/* 섹션별 결과 표 추가 */}
+        <div className="result-table-container">
+          <h3>섹션별 결과 분석</h3>
+          <table className="result-table">
+            <thead>
+              <tr>
+                <th>카테고리</th>
+                <th>점수</th>
+                <th>백분율</th>
+                <th>상태</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.entries(surveyResult.sectionScores).map(([section, data], index) => {
+                // 섹션별 상태 결정
+                let status = '주의 필요';
+                const percentage = parseFloat(data.percentage);
+                if (percentage >= 80) status = '매우 양호';
+                else if (percentage >= 60) status = '양호';
+                else if (percentage >= 40) status = '보통';
+                
+                return (
+                  <tr key={index}>
+                    <td>{section}</td>
+                    <td>{data.score}/{data.maxPossible}</td>
+                    <td>{data.percentage}%</td>
+                    <td className={`status-${status.replace(/\s+/g, '-').toLowerCase()}`}>{status}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="result-recommendations">
+          <h3>권장사항:</h3>
+          <ul>
+            {surveyResult.recommendations.map((rec, index) => (
+              <li key={index}>{rec}</li>
+            ))}
+          </ul>
+        </div>
+
+        {/* 시각화 차트 영역 */}
+        <div className="result-chart">
+          <h3>섹션별 점수 비교</h3>
+          <div className="bar-chart">
+            {Object.entries(surveyResult.sectionScores).map(([section, data], index) => (
+              <div className="chart-row" key={index}>
+                <div className="chart-label">{section.split(':')[0]}</div>
+                <div className="chart-bar-container">
+                  <div 
+                    className="chart-bar" 
+                    style={{ width: `${data.percentage}%` }}
+                    data-percentage={`${data.percentage}%`}
+                  ></div>
+                </div>
               </div>
-            </div>
-
-            <div className="question-item">
-              <p className="question">2. 향후 건강과 관련하여 긍정적인 변화를 만들 준비가 되어 있습니까?</p>
-              <div className="radio-group">
-                <label>
-                  <input 
-                    type="radio" 
-                    name="question2" 
-                    value="5" 
-                    onChange={handleChange} 
-                    required 
-                  />
-                  매우 그렇다
-                </label>
-                <label>
-                  <input 
-                    type="radio" 
-                    name="question2" 
-                    value="4" 
-                    onChange={handleChange} 
-                  />
-                  그렇다
-                </label>
-                <label>
-                  <input 
-                    type="radio" 
-                    name="question2" 
-                    value="3" 
-                    onChange={handleChange} 
-                  />
-                  보통이다
-                </label>
-                <label>
-                  <input 
-                    type="radio" 
-                    name="question2" 
-                    value="2" 
-                    onChange={handleChange} 
-                  />
-                  그렇지 않다
-                </label>
-                <label>
-                  <input 
-                    type="radio" 
-                    name="question2" 
-                    value="1" 
-                    onChange={handleChange} 
-                  />
-                  매우 그렇지 않다
-                </label>
-              </div>
-            </div>
-
-            <div className="question-item">
-              <p className="question">3. 이 설문조사가 귀하의 퇴원 준비에 도움이 되었습니까?</p>
-              <div className="radio-group">
-                <label>
-                  <input 
-                    type="radio" 
-                    name="question3" 
-                    value="5" 
-                    onChange={handleChange} 
-                    required 
-                  />
-                  매우 도움이 됨
-                </label>
-                <label>
-                  <input 
-                    type="radio" 
-                    name="question3" 
-                    value="4" 
-                    onChange={handleChange} 
-                  />
-                  도움이 됨
-                </label>
-                <label>
-                  <input 
-                    type="radio" 
-                    name="question3" 
-                    value="3" 
-                    onChange={handleChange} 
-                  />
-                  보통
-                </label>
-                <label>
-                  <input 
-                    type="radio" 
-                    name="question3" 
-                    value="2" 
-                    onChange={handleChange} 
-                  />
-                  도움이 되지 않음
-                </label>
-                <label>
-                  <input 
-                    type="radio" 
-                    name="question3" 
-                    value="1" 
-                    onChange={handleChange} 
-                  />
-                  전혀 도움이 되지 않음
-                </label>
-              </div>
-            </div>
-
-            <div className="navigation-buttons">
-              <button type="button" onClick={() => navigate('/survey/section6')} className="back-button">이전</button>
-              <button type="submit" className="next-button" disabled={isSubmitting}>
-                {isSubmitting ? '제출 중...' : '설문 제출하기'}
-              </button>
-            </div>
-          </form>
-        </>
-      ) : (
-        <div className="survey-result">
-          <h1>설문조사 결과</h1>
-          <div className="patient-info-summary">
-            <p><strong>{patientInfo.name}</strong>님의 설문조사 결과입니다.</p>
-          </div>
-
-          <div className="result-score">
-            <h2>종합 점수: <span className="score-value">{surveyResult.totalScore}%</span></h2>
-            <p className="result-message">상태: <strong>{surveyResult.message}</strong></p>
-          </div>
-
-          <div className="result-recommendations">
-            <h3>권장사항:</h3>
-            <ul>
-              {surveyResult.recommendations.map((rec, index) => (
-                <li key={index}>{rec}</li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="navigation-buttons">
-            <button type="button" onClick={() => navigate('/')} className="back-button">
-              처음으로 돌아가기
-            </button>
+            ))}
           </div>
         </div>
-      )}
+
+        <div className="navigation-buttons">
+          <button type="button" onClick={() => window.print()} className="print-button">결과 인쇄하기</button>
+          <button type="button" onClick={() => navigate('/')} className="back-button">
+            처음으로 돌아가기
+          </button>
+        </div>
+      </div>
     </div>
   );
 };

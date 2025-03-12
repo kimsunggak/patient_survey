@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './SurveySection1.css';
+import './SurveySection3.css';  // 공통 CSS 추가
 
 const SurveySection5 = () => {
   const navigate = useNavigate();
@@ -40,7 +41,7 @@ const SurveySection5 = () => {
     <div className="survey-container">
       <div className="survey-header">
         <h1>설문조사: 섹션 5</h1>
-        <p>경제적 상황 및 고용</p>
+        <p>사회적 삶의 부담</p>
         <div className="patient-info-summary">
           <p><strong>{patientInfo.name}</strong>님의 설문조사입니다.</p>
         </div>
@@ -48,35 +49,17 @@ const SurveySection5 = () => {
 
       <form onSubmit={handleSubmit} className="survey-form">
         <div className="question-item">
-          <p className="question">1. 퇴원 후 경제적 상황에 대해 얼마나 걱정하고 계십니까?</p>
+          <p className="question">26. 암 발병 전과 비교해서 다른 사람(예: 친구,직장 동료 등)과 잘 어울리지 못한다.</p>
           <div className="radio-group">
             <label>
               <input 
                 type="radio" 
                 name="question1" 
-                value="1" 
+                value="5" 
                 onChange={handleChange} 
                 required 
               />
-              매우 많이 걱정함
-            </label>
-            <label>
-              <input 
-                type="radio" 
-                name="question1" 
-                value="2" 
-                onChange={handleChange} 
-              />
-              걱정함
-            </label>
-            <label>
-              <input 
-                type="radio" 
-                name="question1" 
-                value="3" 
-                onChange={handleChange} 
-              />
-              보통
+              매우 그렇다
             </label>
             <label>
               <input 
@@ -85,22 +68,40 @@ const SurveySection5 = () => {
                 value="4" 
                 onChange={handleChange} 
               />
-              약간 걱정함
+              약간 그렇다
             </label>
             <label>
               <input 
                 type="radio" 
                 name="question1" 
-                value="5" 
+                value="3" 
                 onChange={handleChange} 
               />
-              전혀 걱정하지 않음
+              보통이다
+            </label>
+            <label>
+              <input 
+                type="radio" 
+                name="question1" 
+                value="2" 
+                onChange={handleChange} 
+              />
+              약간 그렇지 않다
+            </label>
+            <label>
+              <input 
+                type="radio" 
+                name="question1" 
+                value="1" 
+                onChange={handleChange} 
+              />
+              전혀 그렇지 않다
             </label>
           </div>
         </div>
 
         <div className="question-item">
-          <p className="question">2. 퇴원 후 직장 복귀나 취업에 대한 계획이 있으십니까?</p>
+          <p className="question">27. 암 발병 전과 비교해서 사회생활(예: 취미, 봉사 활동, 직장 등)을 하는데 어려움을 느낀다.</p>
           <div className="radio-group">
             <label>
               <input 
@@ -110,7 +111,7 @@ const SurveySection5 = () => {
                 onChange={handleChange} 
                 required 
               />
-              이미 계획이 확정되어 있음
+              매우 그렇다
             </label>
             <label>
               <input 
@@ -119,7 +120,7 @@ const SurveySection5 = () => {
                 value="4" 
                 onChange={handleChange} 
               />
-              계획이 있고 준비 중임
+              약간 그렇다
             </label>
             <label>
               <input 
@@ -128,7 +129,7 @@ const SurveySection5 = () => {
                 value="3" 
                 onChange={handleChange} 
               />
-              계획은 있으나 준비는 안 됨
+              보통이다
             </label>
             <label>
               <input 
@@ -137,7 +138,7 @@ const SurveySection5 = () => {
                 value="2" 
                 onChange={handleChange} 
               />
-              계획이 불확실함
+              약간 그렇지 않다
             </label>
             <label>
               <input 
@@ -146,13 +147,13 @@ const SurveySection5 = () => {
                 value="1" 
                 onChange={handleChange} 
               />
-              계획이 전혀 없음
+              전혀 그렇지 않다
             </label>
           </div>
         </div>
 
         <div className="question-item">
-          <p className="question">3. 의료비 지불 및 의료보험에 관한 정보를 충분히 알고 계십니까?</p>
+          <p className="question">28. 암 발병으로 인해 취직, 직장복귀 및 적응(예 : 업무시간, 업무량, 업무 질 등)에 부담감을 느낀다.</p>
           <div className="radio-group">
             <label>
               <input 
@@ -162,7 +163,7 @@ const SurveySection5 = () => {
                 onChange={handleChange} 
                 required 
               />
-              매우 충분히 알고 있음
+              매우 그렇다
             </label>
             <label>
               <input 
@@ -171,7 +172,7 @@ const SurveySection5 = () => {
                 value="4" 
                 onChange={handleChange} 
               />
-              충분히 알고 있음
+              약간 그렇다
             </label>
             <label>
               <input 
@@ -180,7 +181,7 @@ const SurveySection5 = () => {
                 value="3" 
                 onChange={handleChange} 
               />
-              어느 정도 알고 있음
+              보통이다
             </label>
             <label>
               <input 
@@ -189,7 +190,7 @@ const SurveySection5 = () => {
                 value="2" 
                 onChange={handleChange} 
               />
-              잘 모름
+              약간 그렇지 않다
             </label>
             <label>
               <input 
@@ -198,7 +199,7 @@ const SurveySection5 = () => {
                 value="1" 
                 onChange={handleChange} 
               />
-              전혀 모름
+              전혀 그렇지 않다
             </label>
           </div>
         </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './SurveySection1.css'; // 같은 스타일 사용
+import './SurveySection1.css';
+import './SurveySection2.css';
 
 const SurveySection2 = () => {
   const navigate = useNavigate();
@@ -9,15 +10,25 @@ const SurveySection2 = () => {
     question1: '',
     question2: '',
     question3: '',
+    question4: '',
+    question5: '',
+    question6: '',
+    question7: '',
+    question8: '',
+    question9: '',
+    question10: '',
+    question11: '',
+    question12: '',
+    question12_1: [],
+    question13: '',
+    question13_1: []
   });
 
   useEffect(() => {
-    // 로컬 스토리지에서 환자 정보 가져오기
     const storedPatientInfo = localStorage.getItem('patientInfo');
     if (storedPatientInfo) {
       setPatientInfo(JSON.parse(storedPatientInfo));
     } else {
-      // 환자 정보가 없으면 첫 페이지로 리다이렉트
       navigate('/');
     }
   }, [navigate]);
@@ -30,13 +41,25 @@ const SurveySection2 = () => {
     });
   };
 
+  const handleCheckboxChange = (e) => {
+    const { name, value, checked } = e.target;
+    
+    if (checked) {
+      setAnswers({
+        ...answers,
+        [name]: [...(answers[name] || []), value]
+      });
+    } else {
+      setAnswers({
+        ...answers,
+        [name]: (answers[name] || []).filter(item => item !== value)
+      });
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    
-    // 응답 저장
     localStorage.setItem('surveySection2', JSON.stringify(answers));
-    
-    // 다음 섹션으로 이동
     navigate('/survey/section3');
   };
 
@@ -46,7 +69,7 @@ const SurveySection2 = () => {
     <div className="survey-container">
       <div className="survey-header">
         <h1>설문조사: 섹션 2</h1>
-        <p>사회적 관계 및 지원</p>
+        <p>건강한 삶을 위한 관리</p>
         <div className="patient-info-summary">
           <p><strong>{patientInfo.name}</strong>님의 설문조사입니다.</p>
         </div>
@@ -54,7 +77,7 @@ const SurveySection2 = () => {
 
       <form onSubmit={handleSubmit} className="survey-form">
         <div className="question-item">
-          <p className="question">1. 퇴원 후 도움을 청할 가족이나 친구가 있습니까?</p>
+          <p className="question">9. 여러 가지 식품군을 골고루 섭취한다 (예: 균형식).</p>
           <div className="radio-group">
             <label>
               <input 
@@ -64,7 +87,7 @@ const SurveySection2 = () => {
                 onChange={handleChange} 
                 required 
               />
-              매우 많음
+              매우 그렇다
             </label>
             <label>
               <input 
@@ -73,7 +96,7 @@ const SurveySection2 = () => {
                 value="4" 
                 onChange={handleChange} 
               />
-              충분함
+              약간 그렇다
             </label>
             <label>
               <input 
@@ -82,7 +105,7 @@ const SurveySection2 = () => {
                 value="3" 
                 onChange={handleChange} 
               />
-              보통
+              보통이다
             </label>
             <label>
               <input 
@@ -91,7 +114,7 @@ const SurveySection2 = () => {
                 value="2" 
                 onChange={handleChange} 
               />
-              부족함
+              약간 그렇지 않다
             </label>
             <label>
               <input 
@@ -100,111 +123,376 @@ const SurveySection2 = () => {
                 value="1" 
                 onChange={handleChange} 
               />
-              전혀 없음
+              전혀 그렇지 않다
+            </label>
+          </div>
+        </div>
+
+
+        <div className="question-item">
+          <p className="question">10. 암 진단 및 치료 이후, 규칙적인 운동을 하고 있다.</p>
+          <div className="radio-group">
+            <label>
+              <input 
+                type="radio" 
+                name="question9" 
+                value="5" 
+                onChange={handleChange} 
+                required 
+              />
+              매우 그렇다
+            </label>
+            <label>
+              <input 
+                type="radio" 
+                name="question9" 
+                value="4" 
+                onChange={handleChange} 
+              />
+              약간 그렇다
+            </label>
+            <label>
+              <input 
+                type="radio" 
+                name="question9" 
+                value="3" 
+                onChange={handleChange} 
+              />
+              보통이다
+            </label>
+            <label>
+              <input 
+                type="radio" 
+                name="question9" 
+                value="2" 
+                onChange={handleChange} 
+              />
+              약간 그렇지 않다
+            </label>
+            <label>
+              <input 
+                type="radio" 
+                name="question9" 
+                value="1" 
+                onChange={handleChange} 
+              />
+              전혀 그렇지 않다
             </label>
           </div>
         </div>
 
         <div className="question-item">
-          <p className="question">2. 가족이나 친구들과의 관계에 얼마나 만족하십니까?</p>
+          <p className="question">11. 규칙적인 식사를 한다.</p>
           <div className="radio-group">
             <label>
               <input 
                 type="radio" 
-                name="question2" 
+                name="question10" 
                 value="5" 
                 onChange={handleChange} 
                 required 
               />
-              매우 만족
+              매우 그렇다
             </label>
             <label>
               <input 
                 type="radio" 
-                name="question2" 
+                name="question10" 
                 value="4" 
                 onChange={handleChange} 
               />
-              만족
+              약간 그렇다
             </label>
             <label>
               <input 
                 type="radio" 
-                name="question2" 
+                name="question10" 
                 value="3" 
                 onChange={handleChange} 
               />
-              보통
+              보통이다
             </label>
             <label>
               <input 
                 type="radio" 
-                name="question2" 
+                name="question10" 
                 value="2" 
                 onChange={handleChange} 
               />
-              불만족
+              약간 그렇지 않다
             </label>
             <label>
               <input 
                 type="radio" 
-                name="question2" 
+                name="question10" 
                 value="1" 
                 onChange={handleChange} 
               />
-              매우 불만족
+              전혀 그렇지 않다
             </label>
           </div>
         </div>
 
         <div className="question-item">
-          <p className="question">3. 지역사회나 사회복지 서비스에 대해 얼마나 알고 계십니까?</p>
+          <p className="question">12. 나는 내가 생각한 건강관리 방법을 잘 실천하고 있다.</p>
           <div className="radio-group">
             <label>
               <input 
                 type="radio" 
-                name="question3" 
+                name="question11" 
                 value="5" 
                 onChange={handleChange} 
                 required 
               />
-              매우 잘 알고 있음
+              매우 그렇다
             </label>
             <label>
               <input 
                 type="radio" 
-                name="question3" 
+                name="question11" 
                 value="4" 
                 onChange={handleChange} 
               />
-              잘 알고 있음
+              약간 그렇다
             </label>
             <label>
               <input 
                 type="radio" 
-                name="question3" 
+                name="question11" 
                 value="3" 
                 onChange={handleChange} 
               />
-              보통
+              보통이다
             </label>
             <label>
               <input 
                 type="radio" 
-                name="question3" 
+                name="question11" 
                 value="2" 
                 onChange={handleChange} 
               />
-              잘 모름
+              약간 그렇지 않다
             </label>
             <label>
               <input 
                 type="radio" 
-                name="question3" 
+                name="question11" 
                 value="1" 
                 onChange={handleChange} 
               />
-              전혀 모름
+              전혀 그렇지 않다
+            </label>
+          </div>
+        </div>
+
+        <div className="question-item sub-question">
+          <p className="question">12-1. 👉 건강관리를 잘 하고 있지 못한다면, 다음 중 무엇 때문입니까? (해당되는 것에 모두 체크해 주세요. 건강관리를 잘하고 있다면 26번으로 넘어가 주세요.)</p>
+          <div className="checkbox-group">
+            <label>
+              <input 
+                type="checkbox" 
+                name="question12_1" 
+                value="무엇을 해야 할지 몰라서" 
+                onChange={handleCheckboxChange} 
+              />
+              1) 무엇을 해야 할지 몰라서
+            </label>
+            <label>
+              <input 
+                type="checkbox" 
+                name="question12_1" 
+                value="건강관리 자체를 스트레스라고 생각해서" 
+                onChange={handleCheckboxChange} 
+              />
+              2) 건강관리 자체를 스트레스라고 생각해서
+            </label>
+            <label>
+              <input 
+                type="checkbox" 
+                name="question12_1" 
+                value="의지가 없어서" 
+                onChange={handleCheckboxChange} 
+              />
+              3) 의지가 없어서
+            </label>
+            <label>
+              <input 
+                type="checkbox" 
+                name="question12_1" 
+                value="시간이 많이 걸려서" 
+                onChange={handleCheckboxChange} 
+              />
+              4) 시간이 많이 걸려서
+            </label>
+            <label>
+              <input 
+                type="checkbox" 
+                name="question12_1" 
+                value="가족이 도와주지 않아서" 
+                onChange={handleCheckboxChange} 
+              />
+              5) 가족이 도와주지 않아서
+            </label>
+            <label>
+              <input 
+                type="checkbox" 
+                name="question12_1" 
+                value="경제적으로 부담이 되서" 
+                onChange={handleCheckboxChange} 
+              />
+              6) 경제적으로 부담이 되서
+            </label>
+            <div className="other-option">
+              <div>
+                <label style={{ display: 'block', marginBottom: '8px' }}>
+                  7) 기타:
+                </label>
+                <textarea 
+                  name="question12_1_other" 
+                  onChange={(e) => {
+                      const value = e.target.value;
+                      // Remove any previous "기타" entries
+                      const filteredAnswers = answers.question12_1.filter(item => !item.startsWith("기타: "));
+                      
+                      // Only add the new value if it's not empty
+                      if (value.trim()) {
+                        setAnswers({
+                            ...answers,
+                            question12_1: [...filteredAnswers, `기타: ${value}`]
+                        });
+                      } else {
+                        setAnswers({
+                            ...answers,
+                            question12_1: filteredAnswers
+                        });
+                      }
+                  }} 
+                  placeholder="직접 입력해 주세요"
+                  style={{
+                      width: '95%',
+                      height: '120px',
+                      padding: '12px 15px',
+                      border: '1px solid #ccc',
+                      borderRadius: '4px',
+                      fontSize: '35px',
+                      display: 'block',
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+                      resize: 'vertical',
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="question-item">
+          <p className="question">13. 암 진단 및 치료 이후, 식이조절을 한다.</p>
+          <div className="radio-group">
+            <label>
+              <input 
+                type="radio" 
+                name="question12" 
+                value="5" 
+                onChange={handleChange} 
+                required 
+              />
+              매우 그렇다
+            </label>
+            <label>
+              <input 
+                type="radio" 
+                name="question12" 
+                value="4" 
+                onChange={handleChange} 
+              />
+              약간 그렇다
+            </label>
+            <label>
+              <input 
+                type="radio" 
+                name="question12" 
+                value="3" 
+                onChange={handleChange} 
+              />
+              보통이다
+            </label>
+            <label>
+              <input 
+                type="radio" 
+                name="question12" 
+                value="2" 
+                onChange={handleChange} 
+              />
+              약간 그렇지 않다
+            </label>
+            <label>
+              <input 
+                type="radio" 
+                name="question12" 
+                value="1" 
+                onChange={handleChange} 
+              />
+              전혀 그렇지 않다
+            </label>
+          </div>
+        </div>
+
+        <div className="question-item sub-question">
+          <p className="question">13-1.아래 각각의 사항에 대해서 식이조절을 얼마나 잘 하는지 체크해 주세요.</p>
+          <div className="checkbox-group">
+            <label>
+              <input 
+                type="checkbox" 
+                name="question13_1" 
+                value="조미료 섭취를 줄인다." 
+                onChange={handleCheckboxChange} 
+              />
+              1) 조미료 섭취를 줄인다.
+            </label>
+            <label>
+              <input 
+                type="checkbox" 
+                name="question13_1" 
+                value="식품의 신선도를 중요시한다." 
+                onChange={handleCheckboxChange} 
+              />
+              2) 식품의 신선도를 중요시한다.
+            </label>
+            <label>
+              <input 
+                type="checkbox" 
+                name="question13_1" 
+                value="채식 및 과일 위주의 식습관을 한다." 
+                onChange={handleCheckboxChange} 
+              />
+              3) 채식 및 과일 위주의 식습관을 한다.
+            </label>
+            <label>
+              <input 
+                type="checkbox" 
+                name="question13_1" 
+                value="육류 섭취를 조절한다." 
+                onChange={handleCheckboxChange} 
+              />
+              4) 육류 섭취를 조절한다.
+            </label>
+            <label>
+              <input 
+                type="checkbox" 
+                name="question13_1" 
+                value="탄수화물 섭취를 조절한다." 
+                onChange={handleCheckboxChange} 
+              />
+              5) 탄수화물 섭취를 조절한다.
+            </label>
+            <label>
+              <input 
+                type="checkbox" 
+                name="question13_1" 
+                value="항암식품(예: 버섯, 도라지, 두유, 현미식 등)을 먹는다." 
+                onChange={handleCheckboxChange} 
+              />
+              6) 항암식품(예: 버섯, 도라지, 두유, 현미식 등)을 먹는다.
             </label>
           </div>
         </div>
