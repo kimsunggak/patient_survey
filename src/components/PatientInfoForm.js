@@ -8,7 +8,6 @@ const PatientInfoForm = () => {
     name: '',
     age: '',
     gender: '',
-    patientId: '',
     department: '',
     dischargeDate: '',
     phoneNumber: '',
@@ -29,7 +28,6 @@ const PatientInfoForm = () => {
     if (!patientInfo.name) errors.name = '이름을 입력해주세요';
     if (!patientInfo.age) errors.age = '나이를 입력해주세요';
     if (!patientInfo.gender) errors.gender = '성별을 선택해주세요';
-    if (!patientInfo.patientId) errors.patientId = '환자 ID를 입력해주세요';
     
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
@@ -50,7 +48,7 @@ const PatientInfoForm = () => {
     <div className="patient-form-container">
       <div className="form-header">
         <h1>퇴원 준비 설문조사</h1>
-        <p>사회 적응을 위한 평가를 위해 아래 정보를 입력해주세요.</p>
+        <p>환자의 정보를 입력해주세요.</p>
       </div>
 
       <form onSubmit={handleSubmit} className="patient-form">
@@ -63,6 +61,7 @@ const PatientInfoForm = () => {
             value={patientInfo.name}
             onChange={handleChange}
             className={formErrors.name ? 'error' : ''}
+            placeholder="이름을 입력하세요"
           />
           {formErrors.name && <span className="error-message">{formErrors.name}</span>}
         </div>
@@ -76,6 +75,7 @@ const PatientInfoForm = () => {
             value={patientInfo.age}
             onChange={handleChange}
             className={formErrors.age ? 'error' : ''}
+            placeholder="나이를 입력하세요"
           />
           {formErrors.age && <span className="error-message">{formErrors.age}</span>}
         </div>
@@ -92,22 +92,8 @@ const PatientInfoForm = () => {
             <option value="">선택하세요</option>
             <option value="male">남성</option>
             <option value="female">여성</option>
-            <option value="other">기타</option>
           </select>
           {formErrors.gender && <span className="error-message">{formErrors.gender}</span>}
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="patientId">환자 ID *</label>
-          <input
-            type="text"
-            id="patientId"
-            name="patientId"
-            value={patientInfo.patientId}
-            onChange={handleChange}
-            className={formErrors.patientId ? 'error' : ''}
-          />
-          {formErrors.patientId && <span className="error-message">{formErrors.patientId}</span>}
         </div>
 
         <div className="form-group">
@@ -118,6 +104,7 @@ const PatientInfoForm = () => {
             name="department"
             value={patientInfo.department}
             onChange={handleChange}
+            placeholder="진료과를 입력하세요"
           />
         </div>
 
@@ -140,6 +127,7 @@ const PatientInfoForm = () => {
             name="phoneNumber"
             value={patientInfo.phoneNumber}
             onChange={handleChange}
+            placeholder="연락처를 입력하세요"
           />
         </div>
 
@@ -151,6 +139,7 @@ const PatientInfoForm = () => {
             name="email"
             value={patientInfo.email}
             onChange={handleChange}
+            placeholder="이메일을 입력하세요"
           />
         </div>
 

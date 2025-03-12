@@ -16,13 +16,26 @@
 
 .survey-header h1 {
   color: #2c3e50;
-  font-size: 2rem;
+  font-size: 2.5rem;
   margin-bottom: 0.5rem;
 }
 
 .survey-header p {
-  color: #7f8c8d;
-  font-size: 1rem;
+  color: #2c3e50;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  position: relative;
+  display: inline-block;
+}
+
+.survey-header p::after {
+  content: "";
+  display: block;
+  width: 80%;
+  height: 3px;
+  background-color: #3498db;
+  margin: 0.5rem auto 0;
 }
 
 .patient-info-summary {
@@ -107,4 +120,58 @@
   padding: 2rem;
   font-size: 1.1rem;
   color: #555;
+}
+
+/* 설문 결과 스타일 */
+.survey-result {
+  text-align: center;
+  padding: 2rem;
+}
+
+.survey-result h1 {
+  font-size: 2.5rem;
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+}
+
+.result-score {
+  background-color: #f8f9fa;
+  padding: 2rem;
+  border-radius: 10px;
+  margin: 2rem 0;
+}
+
+.score-value {
+  color: #3498db;
+  font-size: 2.2rem;
+  font-weight: bold;
+}
+
+.result-message {
+  font-size: 1.3rem;
+  margin-top: 1rem;
+}
+
+.result-recommendations {
+  background-color: #ebf5fb;
+  padding: 2rem;
+  border-radius: 10px;
+  margin: 2rem 0;
+  text-align: left;
+}
+
+.result-recommendations h3 {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+  font-size: 1.4rem;
+}
+
+.result-recommendations ul {
+  padding-left: 1.5rem;
+}
+
+.result-recommendations li {
+  margin-bottom: 0.8rem;
+  font-size: 1.1rem;
+  line-height: 1.5;
 }

@@ -2,24 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './SurveySection1.css';
 
-const SurveySection1 = () => {
+const SurveySection5 = () => {
   const navigate = useNavigate();
   const [patientInfo, setPatientInfo] = useState(null);
   const [answers, setAnswers] = useState({
     question1: '',
     question2: '',
     question3: '',
-    question4: '',
-    question5: '',
   });
 
   useEffect(() => {
-    // 로컬 스토리지에서 환자 정보 가져오기
     const storedPatientInfo = localStorage.getItem('patientInfo');
     if (storedPatientInfo) {
       setPatientInfo(JSON.parse(storedPatientInfo));
     } else {
-      // 환자 정보가 없으면 첫 페이지로 리다이렉트
       navigate('/');
     }
   }, [navigate]);
@@ -34,12 +30,8 @@ const SurveySection1 = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
-    // 응답 저장
-    localStorage.setItem('surveySection1', JSON.stringify(answers));
-    
-    // 다음 섹션으로 이동
-    navigate('/survey/section2');
+    localStorage.setItem('surveySection5', JSON.stringify(answers));
+    navigate('/survey/section6');
   };
 
   if (!patientInfo) return <div className="loading">로딩 중...</div>;
@@ -47,8 +39,8 @@ const SurveySection1 = () => {
   return (
     <div className="survey-container">
       <div className="survey-header">
-        <h1>설문조사: 섹션 1</h1>
-        <p>암 이후 내 몸의 변화</p>
+        <h1>설문조사: 섹션 5</h1>
+        <p>경제적 상황 및 고용</p>
         <div className="patient-info-summary">
           <p><strong>{patientInfo.name}</strong>님의 설문조사입니다.</p>
         </div>
@@ -56,26 +48,26 @@ const SurveySection1 = () => {
 
       <form onSubmit={handleSubmit} className="survey-form">
         <div className="question-item">
-          <p className="question">1. 현재 귀하의 건강 상태는 어떻습니까?</p>
+          <p className="question">1. 퇴원 후 경제적 상황에 대해 얼마나 걱정하고 계십니까?</p>
           <div className="radio-group">
             <label>
               <input 
                 type="radio" 
                 name="question1" 
-                value="5" 
+                value="1" 
                 onChange={handleChange} 
                 required 
               />
-              매우 좋음
+              매우 많이 걱정함
             </label>
             <label>
               <input 
                 type="radio" 
                 name="question1" 
-                value="4" 
+                value="2" 
                 onChange={handleChange} 
               />
-              좋음
+              걱정함
             </label>
             <label>
               <input 
@@ -90,25 +82,25 @@ const SurveySection1 = () => {
               <input 
                 type="radio" 
                 name="question1" 
-                value="2" 
+                value="4" 
                 onChange={handleChange} 
               />
-              나쁨
+              약간 걱정함
             </label>
             <label>
               <input 
                 type="radio" 
                 name="question1" 
-                value="1" 
+                value="5" 
                 onChange={handleChange} 
               />
-              매우 나쁨
+              전혀 걱정하지 않음
             </label>
           </div>
         </div>
 
         <div className="question-item">
-          <p className="question">2. 일상생활에서 도움 없이 활동할 수 있습니까?</p>
+          <p className="question">2. 퇴원 후 직장 복귀나 취업에 대한 계획이 있으십니까?</p>
           <div className="radio-group">
             <label>
               <input 
@@ -118,7 +110,7 @@ const SurveySection1 = () => {
                 onChange={handleChange} 
                 required 
               />
-              완전히 독립적으로 가능함
+              이미 계획이 확정되어 있음
             </label>
             <label>
               <input 
@@ -127,7 +119,7 @@ const SurveySection1 = () => {
                 value="4" 
                 onChange={handleChange} 
               />
-              대부분 독립적으로 가능함
+              계획이 있고 준비 중임
             </label>
             <label>
               <input 
@@ -136,7 +128,7 @@ const SurveySection1 = () => {
                 value="3" 
                 onChange={handleChange} 
               />
-              부분적으로 도움이 필요함
+              계획은 있으나 준비는 안 됨
             </label>
             <label>
               <input 
@@ -145,7 +137,7 @@ const SurveySection1 = () => {
                 value="2" 
                 onChange={handleChange} 
               />
-              상당한 도움이 필요함
+              계획이 불확실함
             </label>
             <label>
               <input 
@@ -154,13 +146,13 @@ const SurveySection1 = () => {
                 value="1" 
                 onChange={handleChange} 
               />
-              전적으로 도움이 필요함
+              계획이 전혀 없음
             </label>
           </div>
         </div>
 
         <div className="question-item">
-          <p className="question">3. 퇴원 후 귀하의 건강 관리에 대해 얼마나 자신이 있습니까?</p>
+          <p className="question">3. 의료비 지불 및 의료보험에 관한 정보를 충분히 알고 계십니까?</p>
           <div className="radio-group">
             <label>
               <input 
@@ -170,7 +162,7 @@ const SurveySection1 = () => {
                 onChange={handleChange} 
                 required 
               />
-              매우 자신 있음
+              매우 충분히 알고 있음
             </label>
             <label>
               <input 
@@ -179,7 +171,7 @@ const SurveySection1 = () => {
                 value="4" 
                 onChange={handleChange} 
               />
-              자신 있음
+              충분히 알고 있음
             </label>
             <label>
               <input 
@@ -188,7 +180,7 @@ const SurveySection1 = () => {
                 value="3" 
                 onChange={handleChange} 
               />
-              보통
+              어느 정도 알고 있음
             </label>
             <label>
               <input 
@@ -197,7 +189,7 @@ const SurveySection1 = () => {
                 value="2" 
                 onChange={handleChange} 
               />
-              자신 없음
+              잘 모름
             </label>
             <label>
               <input 
@@ -206,13 +198,13 @@ const SurveySection1 = () => {
                 value="1" 
                 onChange={handleChange} 
               />
-              매우 자신 없음
+              전혀 모름
             </label>
           </div>
         </div>
 
         <div className="navigation-buttons">
-          <button type="button" onClick={() => navigate('/')} className="back-button">이전</button>
+          <button type="button" onClick={() => navigate('/survey/section4')} className="back-button">이전</button>
           <button type="submit" className="next-button">다음</button>
         </div>
       </form>
@@ -220,4 +212,4 @@ const SurveySection1 = () => {
   );
 };
 
-export default SurveySection1;
+export default SurveySection5;
