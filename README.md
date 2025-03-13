@@ -25,3 +25,28 @@
    - 개별 환자 **설문 결과 확인 및 코멘트 작성** 기능
 
 ---
+
+## 💻 필수 요구사항
+
+- **Node.js** (최소 v14 이상 권장)
+- **npm** (Node Package Manager)
+
+---
+
+## 📦 설치 및 실행
+
+### 1. 저장소 클론 및 설치
+```bash
+# 저장소 클론
+git clone https://github.com/your-repo-name.git
+cd your-repo-name
+
+# React 관련 라이브러리 설치
+cd frontend
+npm install
+
+# 프론트엔드 개발 서버 실행 (기본적으로 http://localhost:3000 에서 실행)
+npm start
+
+🔧 백엔드 연동 및 주의사항
+프론트엔드(포트 3000)와 백엔드(포트 5000)가 다른 포트에서 실행될 경우, 백엔드 서버에서 CORS 설정을 통해 프론트엔드의 요청을 허용해야 함
