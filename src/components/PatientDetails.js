@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Bar, Doughnut } from "react-chartjs-2";
 import { Chart as ChartJS, BarElement, CategoryScale, LinearScale, ArcElement, Tooltip, Legend } from "chart.js";
 import "./PatientDetails.css";
@@ -8,19 +8,37 @@ ChartJS.register(BarElement, CategoryScale, LinearScale, ArcElement, Tooltip, Le
 
 const PatientDetails = ({ patientData, onSelectSidebar = () => {} }) => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const patient = patientData.find((p) => p.id === parseInt(id));
 
   const [comments, setComments] = useState([]);
+  const [newComment, setNewComment] = useState(""); // 입력할 코멘트
 
   useEffect(() => {
     onSelectSidebar("patientInfo");
 
     // ✅ 로컬 스토리지에서 환자별 코멘트 불러오기
     const storedComments = JSON.parse(localStorage.getItem("comments")) || {};
-    setComments(storedComments[patient.name] || []);
+    const patientComments = storedComments[patient.name] || [];
+    setComments(patientComments.slice(-3)); // 최근 3개만 표시
   }, [onSelectSidebar, patient.name]);
 
-  // ✅ 섹션별 데이터 (예제 평균값 포함)
+  // ✅ 코멘트 저장 함수
+  const addComment = () => {
+    if (!newComment.trim()) return;
+    const commentWithDate = { text: newComment, date: new Date().toLocaleString() };
+
+    const storedComments = JSON.parse(localStorage.getItem("comments")) || {};
+    const updatedComments = [...(storedComments[patient.name] || []), commentWithDate];
+
+    storedComments[patient.name] = updatedComments;
+    localStorage.setItem("comments", JSON.stringify(storedComments));
+
+    setComments(updatedComments.slice(-3)); // 최근 3개만 표시
+    setNewComment(""); // 입력창 초기화
+  };
+
+  // ✅ 결과 분석 데이터 (막대 그래프)
   const sectionLabels = [
     "암 이후 몸 변화",
     "건강한 삶 관리",
@@ -32,7 +50,7 @@ const PatientDetails = ({ patientData, onSelectSidebar = () => {} }) => {
   const patientScores = [30, 50, 75, 60, 80, 40]; // 예제 데이터
   const averageScores = [40, 55, 70, 65, 75, 50]; // 예제 데이터
 
-  // ✅ 막대 그래프 데이터 추가
+  // ✅ 막대 그래프 데이터
   const barChartData = {
     labels: sectionLabels,
     datasets: [
@@ -49,7 +67,7 @@ const PatientDetails = ({ patientData, onSelectSidebar = () => {} }) => {
     ],
   };
 
-  // ✅ 원형 그래프 데이터 추가
+  // ✅ 도넛 그래프 데이터
   const doughnutChartData = {
     labels: sectionLabels,
     datasets: [
@@ -59,56 +77,6 @@ const PatientDetails = ({ patientData, onSelectSidebar = () => {} }) => {
       },
     ],
   };
-
-  // ✅ 팝업 열기 함수
-  const openCommentPopup = () => {
-    const popup = window.open("", "_blank", "width=500,height=500");
-    if (popup) {
-      popup.document.write(`
-        <html>
-          <head>
-            <title>코멘트 입력</title>
-            <style>
-              body { font-family: Arial, sans-serif; padding: 20px; }
-              textarea { width: 100%; height: 80px; margin-bottom: 10px; }
-              button { padding: 10px; background-color: #007bff; color: white; border: none; cursor: pointer; }
-            </style>
-          </head>
-          <body>
-            <h2>코멘트 입력</h2>
-            <textarea id="commentInput"></textarea>
-            <button id="submitComment">등록</button>
-            <script>
-              document.getElementById("submitComment").addEventListener("click", function() {
-                const comment = document.getElementById("commentInput").value;
-                if (comment.trim()) {
-                  window.opener.postMessage({ patientName: "${patient.name}", comment: comment }, "*");
-                  window.close();
-                }
-              });
-            </script>
-          </body>
-        </html>
-      `);
-    }
-  };
-
-   // ✅ 코멘트 저장 (팝업에서 메시지 수신)
-   useEffect(() => {
-    const handleCommentMessage = (event) => {
-      if (event.data.patientName === patient.name) {
-        const storedComments = JSON.parse(localStorage.getItem("comments")) || {};
-        const updatedComments = [...(storedComments[patient.name] || []), event.data.comment];
-
-        storedComments[patient.name] = updatedComments;
-        localStorage.setItem("comments", JSON.stringify(storedComments));
-
-        setComments(updatedComments);
-      }
-    };
-    window.addEventListener("message", handleCommentMessage);
-    return () => window.removeEventListener("message", handleCommentMessage);
-  }, [comments, patient.name]);
 
   return (
     <div className="patient-details">
@@ -126,30 +94,51 @@ const PatientDetails = ({ patientData, onSelectSidebar = () => {} }) => {
         <p>상태: {patient.status}</p>
       </div>
 
-      {/* ✅ 결과 분석 차트 */}
+      {/* ✅ 결과 분석 차트 (막대 그래프) */}
       <div className="analysis-section">
         <h3>결과 분석</h3>
-        <Bar data={barChartData} />
+        <div className="chart-container">
+          <Bar data={barChartData} options={{ responsive: true, maintainAspectRatio: false }} />
+        </div>
       </div>
 
-      {/* ✅ 백분율 차트 */}
+      {/* ✅ 백분율 차트 (도넛 그래프) */}
       <div className="percentage-section">
         <h3>백분율</h3>
-        <Doughnut data={doughnutChartData} />
+        <div className="chart-container">
+          <Doughnut data={doughnutChartData} options={{ responsive: true, maintainAspectRatio: false }} />
+        </div>
       </div>
 
-      {/* ✅ 팝업으로 코멘트 입력 */}
-      <button className="comments-button" onClick={openCommentPopup}>✏️ Comments</button>
+      {/* ✅ 코멘트 입력창 (UI 개선) */}
+      <div className="comment-input-container">
+        <input
+          type="text"
+          placeholder="코멘트를 입력하세요..."
+          value={newComment}
+          onChange={(e) => setNewComment(e.target.value)}
+        />
+        <button onClick={addComment} className="comment-add-button">➕</button>
+      </div>
 
-      {/* ✅ 저장된 코멘트 리스트 */}
+      {/* ✅ 저장된 코멘트 리스트 (최근 3개) */}
       <div className="comment-list">
-        <h3>환자 코멘트</h3>
+        <h3>환자 코멘트 (최근 3개)</h3>
         <ul>
           {comments.map((comment, index) => (
-            <li key={index}>{comment}</li>
+            <li key={index} className="comment-item">
+              <p>{comment.text}</p>
+              <small>{comment.date}</small>
+            </li>
           ))}
         </ul>
       </div>
+
+
+      {/* ✅ 코멘트 페이지로 이동 (해당 환자의 코멘트만 보이도록 설정) */}
+      <button onClick={() => navigate(`/commentsPage?patient=${patient.name}`)} className="comment-view-button">
+        모든 코멘트 보기
+      </button>
     </div>
   );
 };
