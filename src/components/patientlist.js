@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";  // ✅ useNavigate 추가
+import { useNavigate } from "react-router-dom";
 import "./patientlist.css";
 
 const initialPatients = [
@@ -13,17 +13,46 @@ const initialPatients = [
 
 const PatientList = () => {
   const [patients] = useState(initialPatients);
-  const navigate = useNavigate();  // ✅ 페이지 이동을 위한 useNavigate 사용
+  const [searchTerm, setSearchTerm] = useState(""); // 🔍 검색어 상태
+  const [sortOrder, setSortOrder] = useState("latest"); // 🔄 정렬 상태
+  const navigate = useNavigate();
+
+  // 🔍 검색 기능 (이름 필터링)
+  const filteredPatients = patients.filter((patient) =>
+    patient.name.includes(searchTerm) // 입력한 검색어가 포함된 환자만 필터링
+  );
+
+  // 🔄 정렬 기능
+  const sortedPatients = [...filteredPatients].sort((a, b) => {
+    if (sortOrder === "name") return a.name.localeCompare(b.name); // 가나다순 정렬
+    if (sortOrder === "latest") return b.id - a.id; // 최신순 정렬
+    return 0;
+  });
 
   return (
     <div className="patient-list">
       <h2>환자 목록</h2>
+
+      {/* 🔍 검색 & 정렬 UI */}
+      <div className="search-sort-container">
+        <input
+          type="text"
+          placeholder="환자 이름 검색..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+
+        <button onClick={() => setSortOrder("name")}>가나다순</button>
+        <button onClick={() => setSortOrder("latest")}>최신순</button>
+      </div>
+
+      {/* 🔄 정렬된 & 검색된 환자 목록 표시 */}
       <div className="patient-container">
-        {patients.map((patient) => (
+        {sortedPatients.map((patient) => (
           <div
             key={patient.id}
             className="patient-card"
-            onClick={() => navigate(`/patient/${patient.id}`)}  // ✅ 클릭 시 환자 상세 페이지 이동
+            onClick={() => navigate(`/patient/${patient.id}`)}
           >
             <h3>{patient.name}</h3>
             <p>종합점수: {patient.score}점</p>
