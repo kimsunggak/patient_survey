@@ -13,10 +13,10 @@ const Profile = ({ userName, onLogout }) => {
     }
   };
 
-  const handleLogout = () => {
+  /* const handleLogout = () => {
     onLogout();  // ✅ 상위 컴포넌트(App.js)에서 전달된 로그아웃 함수 실행
     navigate("/");  // ✅ 로그아웃 후 로그인 페이지로 이동
-  };
+  };*/
 
   return (
     <div className="profile">
@@ -35,8 +35,13 @@ const Profile = ({ userName, onLogout }) => {
       />
       <p>{userName}</p>
       
-      {/* ✅ 로그아웃 버튼 추가 */}
-      <button className="logout-button" onClick={handleLogout}>로그아웃</button>
+      {/*
+  ✅ 로그아웃 버튼 숨기기
+  <button className="logout-button" onClick={handleLogout}>
+    로그아웃
+  </button>
+*/}
+
     </div>
   );
 };

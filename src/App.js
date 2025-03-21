@@ -48,11 +48,12 @@ function App() {
       <div className="app">
         {/* ✅ 로그인 상태일 때만 사이드바와 프로필 표시 */}
         {isAuthenticated && (
-          <>
-            <Sidebar selectedTab={currentPage} onNavigate={handleNavigate} onLogout={handleLogout} />
-            <Profile userName="홍길동" onLogout={handleLogout} />  {/* ✅ Profile 컴포넌트 추가 */}
-          </>
-        )}
+  <>
+    <Sidebar selectedTab={currentPage} onNavigate={handleNavigate} onLogout={handleLogout} />
+    {currentPage !== "patientlist" && <Profile userName="홍길동" onLogout={handleLogout} />}  {/* ✅ 환자 목록에서는 숨김 */}
+  </>
+)}
+
 
         <div className="content">
           <Routes>
