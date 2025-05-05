@@ -185,7 +185,7 @@ function MultiRadioSection({ title, items, answers, handleChange }) {
   );
 }
 
-function SurveyForm() {
+function SurveyForm({ onSubmit }) {
   const [answers, setAnswers] = useState({});
   const [multi12_1, setMulti12_1] = useState([]);
   const [etc12_1, setEtc12_1] = useState("");
@@ -212,20 +212,31 @@ function SurveyForm() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    alert(
-      JSON.stringify(
-        {
-          ...answers,
-          "12-1": multi12_1,
-          "12-1-etc": etc12_1,
-          "13-1": diet13_1,
-          "15-1": multi15_1,
-          "15-1-etc": etc15_1,
-        },
-        null,
-        2
-      )
-    );
+    if (onSubmit) {
+      onSubmit({
+        ...answers,
+        "12-1": multi12_1,
+        "12-1-etc": etc12_1,
+        "13-1": diet13_1,
+        "15-1": multi15_1,
+        "15-1-etc": etc15_1,
+      });
+    } else {
+      alert(
+        JSON.stringify(
+          {
+            ...answers,
+            "12-1": multi12_1,
+            "12-1-etc": etc12_1,
+            "13-1": diet13_1,
+            "15-1": multi15_1,
+            "15-1-etc": etc15_1,
+          },
+          null,
+          2
+        )
+      );
+    }
   };
 
   return (
