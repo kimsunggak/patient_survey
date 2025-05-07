@@ -37,16 +37,26 @@ function App() {
   const handleSurveySubmit = (answers) => {
     const rescore = SurveyUtils.applyReverseScore(answers); // 역코딩 적용
     let total = 0;
+    // 전체 평균 점수에 대한 집단 분류를 위한 변수
+    let meanSum = 0;
+    
     const sectionScores = sectionIds.map((ids, idx) => {
       const sum = ids.reduce((acc, id) => acc + (parseInt(rescore[id]) || 0), 0);
       // 섹션별 평균점수(합계/문항수)
       const meanScore = sum / ids.length;
+      // 변환전의 점수로 범위를 나눠야 함
+      meanSum += meanScore;
       // 변환 점수 계산
       const convertedScore = SurveyUtils.newScore(sectionNames[idx], meanScore);
       total += convertedScore;
-      return { section: sectionNames[idx], score: convertedScore };
+      const group = SurveyUtils.getRiskGroup(sectionNames[idx], meanScore); 
+      return { section: sectionNames[idx],group: group,score: convertedScore };
     });
-    setResult({ totalScore: total, sectionScores });
+    const totalMeanScore = meanSum / sectionScores.length;
+    const totalScore = Math.round(total / sectionScores.length); // 전체 평균(반올림)
+    // 전체 평균 점수에 대한 집단 분류 추가
+    const totalGroup = SurveyUtils.getRiskGroup("전체 평균 (암 생존자 건강관리)", totalMeanScore);
+    setResult({ totalScore, sectionScores, totalGroup });
   };
   // 설문 조사 다시하기 버튼누르면 호출되는 함수
   const handleBack = () => setResult(null);
@@ -57,6 +67,7 @@ function App() {
         <ResultPage
           totalScore={result.totalScore}
           sectionScores={result.sectionScores}
+          totalGroup={result.totalGroup}
           onBack={handleBack}
         />
       ) : (
