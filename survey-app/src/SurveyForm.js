@@ -240,7 +240,7 @@ function SurveyForm({ onSubmit }) {
     <form onSubmit={handleSubmit}>
       <h2>설문조사</h2>
       <Section title="1. 암 이후 내 몸의 변화" questions={section1} answers={answers} handleChange={handleChange} />
-      <Section title="2. 건강한 삶을 위한 관리" questions={section2} answers={answers} handleChange={handleChange} />
+      <Section title="2. 건강한 삶을 위한 관리" questions={section2.slice(0,4)} answers={answers} handleChange={handleChange} />
       <MultiCheckSection
         title="12-1. 건강관리를 잘 하지 못하는 이유 (해당 항목 모두 체크)"
         options={reasons12_1}
@@ -249,13 +249,14 @@ function SurveyForm({ onSubmit }) {
         etcValue={etc12_1}
         onEtcChange={(e) => setEtc12_1(e.target.value)}
       />
+      <Section title="" questions={section2.slice(4,5)} answers={answers} handleChange={handleChange} />
       <MultiRadioSection
         title="13-1. 식이조절 항목별 실천 정도"
         items={diet13_1_items}
         answers={diet13_1}
         handleChange={handleDiet13_1}
       />
-      <Section title="3. 회복을 도와주는 사람들" questions={section3} answers={answers} handleChange={handleChange} />
+      <Section title="3. 회복을 도와주는 사람들" questions={section3.slice(0,2)} answers={answers} handleChange={handleChange} />
       <MultiCheckSection
         title="15-1. 가족의 도움·관심이 부족한 이유 (해당 항목 모두 체크)"
         options={reasons15_1}
@@ -264,6 +265,7 @@ function SurveyForm({ onSubmit }) {
         etcValue={etc15_1}
         onEtcChange={(e) => setEtc15_1(e.target.value)}
       />
+      <Section title="" questions={section3.slice(2,4)} answers={answers} handleChange={handleChange} />
       <Section title="4. 심리적 부담" questions={section4} answers={answers} handleChange={handleChange} />
       <Section title="5. 사회적 삶의 부담" questions={section5} answers={answers} handleChange={handleChange} />
       <Section title="6. 암 이후 탄력성" questions={section6} answers={answers} handleChange={handleChange} />

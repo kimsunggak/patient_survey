@@ -56,7 +56,7 @@ function App() {
     const totalScore = Math.round(total / sectionScores.length); // 전체 평균(반올림)
     // 전체 평균 점수에 대한 집단 분류 추가
     const totalGroup = SurveyUtils.getRiskGroup("전체 평균 (암 생존자 건강관리)", totalMeanScore);
-    setResult({ totalScore, sectionScores, totalGroup });
+    setResult({ totalScore, sectionScores, totalGroup, reason12_1: answers["12-1"] });
   };
   // 설문 조사 다시하기 버튼누르면 호출되는 함수
   const handleBack = () => setResult(null);
@@ -68,6 +68,7 @@ function App() {
           totalScore={result.totalScore}
           sectionScores={result.sectionScores}
           totalGroup={result.totalGroup}
+          reason12_1={result.reason12_1}
           onBack={handleBack}
         />
       ) : (
