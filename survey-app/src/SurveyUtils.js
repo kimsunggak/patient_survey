@@ -19,3 +19,20 @@ export function applyReverseScore(answers) {
     }
     return result;
 }
+
+// 점수 변환 함수
+const SectionStats =  {
+    "암 이후 내 몸의 변화": { mean: 3.09, sd: 0.95 },
+    "건강한 삶을 위한 관리": { mean: 3.63, sd: 0.76 },
+    "회복을 도와주는 사람들": { mean: 3.84, sd: 0.94 },
+    "심리적 부담": { mean: 3.08, sd: 0.91 },
+    "사회적 삶의 부담": { mean: 3.39, sd: 1.20 },
+    "암 이후 탄력성 및 추가 문항": { mean: 4.28, sd: 0.72 },
+    "전체 평균 (암 생존자 건강관리)": { mean: 3.46, sd: 0.65 }
+  };
+export function newScore(sectionName, userScore) {
+    const stat = SectionStats[sectionName];
+    if (!stat) return null;
+    const z_score = (userScore - stat.mean) / stat.sd;
+    return Math.round((z_score * 16.67) + 50);
+}

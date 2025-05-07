@@ -86,13 +86,10 @@ const section6 = [
   { id: 29, text: "암 치료가 끝났지만, 여전히 건강관리는 중요하다고 느낀다" },
   { id: 30, text: "나는 암을 잘 견뎌냈다는 자신감이 있다" },
   { id: 31, text: "암 발병 후, 내 인생을 긍정적으로 보고 있다" },
-];
-
-// 7. 추가 문항
-const section7 = [
   { id: 32, text: "암 발병 이후, 절주하고 있다" },
   { id: 33, text: "암 발병 이후, 금연하고 있다" },
 ];
+
 
 function Section({ title, questions, answers, handleChange }) {
   return (
@@ -270,7 +267,6 @@ function SurveyForm({ onSubmit }) {
       <Section title="4. 심리적 부담" questions={section4} answers={answers} handleChange={handleChange} />
       <Section title="5. 사회적 삶의 부담" questions={section5} answers={answers} handleChange={handleChange} />
       <Section title="6. 암 이후 탄력성" questions={section6} answers={answers} handleChange={handleChange} />
-      <Section title="7. 추가 문항" questions={section7} answers={answers} handleChange={handleChange} />
       <button type="submit">제출</button>
     </form>
   );
