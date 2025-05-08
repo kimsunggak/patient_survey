@@ -25,3 +25,34 @@
 
 본 프로젝트는 데이터 기반의 자동화된 분석과 효율적인 온라인 설문조사 관리로, 암 환자의 원활한 사회 복귀와 사회복지사의 업무 효율성 향상을 동시에 지원합니다.
 
+
+### 🗂️ src 폴더 구조
+
+src/
+│
+├── component/                   # UI 컴포넌트 모음
+│   ├── home_ui.js               # 메인 페이지 UI 컴포넌트 (카드/버튼 등)
+│   ├── SurveyForm.js            # 설문 전 개인정보/진단 정보 입력 폼
+│   ├── SurveyResult.js          # 결과 리포트 시각화 (Radar, Bar 차트 + 피드백)
+│   ├── Section1Component.js     # 섹션 1: 신체 변화
+│   ├── Section2Component.js     # 섹션 2: 건강한 삶을 위한 관리
+│   ├── Section3Component.js     # 섹션 3: 가족/사회 지지
+│   ├── Section4Component.js     # 섹션 4: 심리적 부담
+│   ├── Section5Component.js     # 섹션 5: 사회적 삶의 부담
+│   ├── Section6Component.js     # 섹션 6: 암 이후 탄력성
+│   └── Section7Component.js     # 섹션 7: 생활 습관 (절주/금연)
+│
+├── pages/                       # 라우팅 페이지 컴포넌트
+│   ├── home.js                  # 홈 소개 페이지 (/)
+│   ├── info.js                  # 설문 시작 전 개인정보 입력 페이지 (/info)
+│   ├── Section1Page.js          # 섹션 1 설문 페이지
+│   ├── Section2Page.js          # 섹션 2 설문 페이지
+│   ├── Section3Page.js          # 섹션 3 설문 페이지
+│   ├── Section4Page.js          # 섹션 4 설문 페이지
+│   ├── Section5Page.js          # 섹션 5 설문 페이지
+│   ├── Section6Page.js          # 섹션 6 설문 페이지
+│   ├── Section7Page.js          # 섹션 7 설문 페이지
+│   └── SurveyResultPage.js      # 결과 페이지 (/survey-result)
+│
+└── utils/                       # 공통 유틸리티 함수
+    └── scoreutils.js            # 점수 표준화, 위험도 분석 유
