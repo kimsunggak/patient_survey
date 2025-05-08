@@ -55,4 +55,4 @@ src/
 │   └── SurveyResultPage.js      # 결과 페이지 (/survey-result)
 │
 └── utils/                       # 공통 유틸리티 함수
-    └── scoreutils.js            # 점수 표준화, 위험도 분석 유
+    └── scoreutils.js            # 점수
