@@ -1,6 +1,6 @@
 // src/pages/Section1Page.js
-import React, { useState,useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Container,
   Typography,
@@ -24,7 +24,8 @@ const steps = [
 
 const Section1Page = () => {
   const navigate = useNavigate();
-  const [answers, setAnswers] = useState({});
+  const location = useLocation();
+  const [answers, setAnswers] = useState(location.state?.answers || {});
   const [error, setError] = useState(false);
 
   const total = 8;  // Q1~Q8
@@ -34,7 +35,7 @@ const Section1Page = () => {
 
   const handleNext = () => {
     if (done < total) return setError(true);
-    navigate('/section2');
+    navigate('/section2', { state: { answers } });
   };
   useEffect(() => {
     if (done === total) setError(false);
@@ -81,7 +82,7 @@ const Section1Page = () => {
       {/* 질문 카드 */}
       <Paper elevation={3} sx={{ p: 4 }}>
         {/* 섹션 제목 */}
-        <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2,textAlign:"center" }} >
+        <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, textAlign: "center" }} >
           {steps[currentStep]}
         </Typography>
 

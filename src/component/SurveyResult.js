@@ -1,6 +1,5 @@
 import React from 'react';
-import { Box, Grid, Typography, Container, Paper, Divider } from '@mui/material';
-import { red, orange } from '@mui/material/colors';
+import { Box, Grid, Typography, Container, Paper } from '@mui/material';
 import { Radar, Bar } from 'react-chartjs-2';
 import {
   Chart,
@@ -14,9 +13,8 @@ import {
   LinearScale,
   BarElement
 } from 'chart.js';
-import { green, amber } from '@mui/material/colors';
 
-import { rawDataStats, getStandardScore, getRiskLevel } from '../utils/scoreutils';
+import * as SurveyUtils from '../utils/SurveyUtils';
 
 // 차트 요소 등록
 Chart.register(
@@ -35,7 +33,7 @@ Chart.register(
 const labelMap = {
   physicalChange: '암 이후 내 몸의 변화',
   healthManagement: '건강한 삶을 위한 관리',
-  support: '회복하도록 도와주는 사람들',
+  support: '회복을 도와주는 사람들',
   psychologicalBurden: '심리적 부담',
   socialBurden: '사회적 삶의 부담',
   resilience: '암 이후 탄력성',
@@ -51,23 +49,36 @@ const maxScores = {
   lifestyle: 10
 };
 
-const SurveyResult = ({ scores }) => {
+const SurveyResult = ({
+  rawScores = {},
+  meanScores = {},
+  stdScores = {},
+  riskGroups = {},
+  overallFeedback = "",
+  overallRiskGroup = "",
+  answers = {},
+  riskByMean = {} // ← 추가
+}) => {
   // 1) 데이터 전처리
-  const processed = Object.keys(scores).map((key) => {
-    const value = scores[key] ?? 0;
-    const stats = rawDataStats[key];
+  const processed = Object.keys(rawScores).map((key) => {
+    const value = rawScores[key] ?? 0;
+    const mean  = meanScores[key] ?? 0;
     const included = key !== 'lifestyle';
+    const sectionName = labelMap[key];
     return {
       key,
-      label: labelMap[key],
+      label: sectionName,
       value,
+      mean,
       max: maxScores[key],
-      stdScore: included ? getStandardScore(value, stats.mean, stats.sd) : 0,
-      level: included ? getRiskLevel(value, stats.mean, stats.sd) : 'safe',
-      stats,
+      stdScore: included ? SurveyUtils.newScore(sectionName, mean) : 0,
+      level: included ? SurveyUtils.getRiskGroup(sectionName, mean) : '저위험집단',
       included
     };
   });
+
+  // 디버깅: mean, stdScore 값 콘솔 출력
+  console.table(processed.map(({ key, mean, stdScore }) => ({ key, mean, stdScore })));
 
   // 2) 레이더 차트 데이터
   const radarData = {
@@ -84,18 +95,23 @@ const SurveyResult = ({ scores }) => {
 
   // 3) 막대 차트 데이터
   const cats = processed.filter(p => p.included);
+  const labels = cats.map(p => p.label);
+  // ① 파란 막대: **T-score**(0~100)
+  const myScores = cats.map(p => p.stdScore ?? 0);
+  // ② 회색 막대: **기준선 50**(T-score 평균)
+  const avgScores = cats.map(() => 50);
   const barData = {
-    labels: cats.map(p => p.label),
+    labels,
     datasets: [
       {
-        label: '제트 스코어',
-        data: cats.map(p => p.stdScore),
-        backgroundColor: 'rgba(25, 118, 210, 0.7)'
+        label: '나의 T-점수',
+        data: myScores,
+        backgroundColor: 'rgba(54,162,235,0.6)'
       },
       {
-        label: '평균 점수(%)',
-        data: cats.map(p => Math.round((p.stats.mean / p.max) * 100)),
-        backgroundColor: 'rgba(200, 200, 200, 0.5)'
+        label: '집단 평균(T=50)',
+        data: avgScores,
+        backgroundColor: 'rgba(200,200,200,0.5)'
       }
     ]
   };
@@ -107,22 +123,12 @@ const SurveyResult = ({ scores }) => {
     }
   };
 
-  // 4) 피드백 로직 분리
-  const total = cats.reduce((sum, p) => sum + p.value, 0);
-  const totalMax = cats.reduce((sum, p) => sum + p.max, 0);
-  const totalPct = Math.round((total / totalMax) * 100);
-  const lifeScore = scores.lifestyle ?? 0;
-
-  let overallFeedback;
-  if (totalPct >= 80) overallFeedback = '전반적으로 건강 관리 점수가 우수합니다!';
-  else if (totalPct >= 50) overallFeedback = '건강 관리 점수가 보통 수준입니다. 지속적 관리가 필요합니다.';
-  else overallFeedback = '건강 관리 점수가 낮습니다. 집중적인 관리가 필요합니다.';
-
-  let additionalFeedback;
-  if (lifeScore < maxScores.lifestyle * 0.5)
-    additionalFeedback = '생활 습관 개선이 필요합니다.';
-  else
-    additionalFeedback = '생활 습관이 양호합니다.';
+  // 4) 추가 피드백: answers 전체를 통째로 함수에 전달
+  const additionalComments = SurveyUtils.getAdditionalFeedback(
+    answers,
+    meanScores,
+    riskByMean
+  );
 
   return (
     <Box sx={{ backgroundColor: 'background.default', py: 6 }}>
@@ -181,7 +187,7 @@ const SurveyResult = ({ scores }) => {
 
           {/* 3. 피드백 카드 그리드 */}
           <Grid container spacing={2} direction="column">
-            {/* 전체 피드백 (연두색 영역) */}
+            {/* 전체 피드백 카드 (연두색 영역) */}
             <Grid item xs={12} >
               <Paper elevation={1} sx={{
                 p: 3,
@@ -191,27 +197,45 @@ const SurveyResult = ({ scores }) => {
                 <Typography variant="subtitle1" align="center" sx={{ fontWeight: 'bold', mb: 1, color: 'primary.dark' }}>
                   전체 피드백
                 </Typography>
+                <Typography variant="subtitle2" align="center" sx={{ mb: .5 }}>
+                  {overallRiskGroup}
+                </Typography>
                 <Typography variant="body2" align="center" color="text.secondary">
                   {overallFeedback}
                 </Typography>
               </Paper>
             </Grid>
 
-            {/* 추가 문항 피드백 (주황색 영역) */}
-            <Grid item xs={12} >
-              <Paper elevation={1} sx={{
-                p: 3,
-                borderLeft: `4px solid #ffffff`,
-                height: '100%'
-              }}>
-                <Typography variant="subtitle1" align="center" sx={{ fontWeight: 'bold', mb: 1, color: 'primary.dark' }}>
-                  추가 피드백
-                </Typography>
-                <Typography variant="body2"  align="center" color="text.secondary">
-                  {additionalFeedback}
-                </Typography>
-              </Paper>
-            </Grid>
+            {/* ★ 추가 피드백 – 하나의 영역으로 통합 */}
+            {additionalComments.length > 0 && (
+              <Grid item xs={12}>
+                <Paper elevation={1} sx={{ p: 3, borderLeft:'4px solid #ffffff' }}>
+                  <Typography
+                    variant="subtitle1"
+                    align="center"
+                    sx={{ fontWeight:'bold', mb:1, color:'primary.dark' }}
+                  >
+                    추가 피드백
+                  </Typography>
+                  {additionalComments.map(({ text, style }, idx) => (
+                    <Typography
+                      key={idx}
+                      variant="body2"
+                      align="center"
+                      sx={{ mb: .5,
+                        color:
+                          style === "error"   ? "error.main"   :
+                          style === "info"    ? "primary.main" :
+                          style === "success" ? "success.main" : "text.primary",
+                        fontWeight:'bold'
+                      }}
+                    >
+                      {text}
+                    </Typography>
+                  ))}
+                </Paper>
+              </Grid>
+            )}
           </Grid>
 
         </Paper>

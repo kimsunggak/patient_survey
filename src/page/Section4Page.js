@@ -1,6 +1,6 @@
 // src/pages/Section4Page.js
-import React, { useState,useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Container,
   Typography,
@@ -24,25 +24,26 @@ const steps = [
 
 const Section4Page = () => {
   const navigate = useNavigate();
-  const [answers, setAnswers] = useState({});
+  const location = useLocation();
+  const [answers, setAnswers] = useState(location.state?.answers || {});
   const [error, setError] = useState(false);
 
   const total = 8;  // Q18~Q25
-  const done = ['q18','q19','q20','q21','q22','q23','q24','q25']
+  const done = ['q18', 'q19', 'q20', 'q21', 'q22', 'q23', 'q24', 'q25']
     .filter((id) => answers[id]).length;
   const progress = (done / total) * 100;
   const currentStep = 3;
 
   const handleNext = () => {
     if (done < total) return setError(true);
-    navigate('/section5');
+    navigate('/section5', { state: { answers } });
   };
   useEffect(() => {
-      if (done === total) setError(false);
-    }, [done]);
+    if (done === total) setError(false);
+  }, [done]);
 
   return (
-    <Container maxWidth="md" sx={{ py: 4,background: 'none',
+    <Container maxWidth="md" sx={{ py: 4, background: 'none',
       bgcolor: 'background.default' }}>
       <Typography variant="h4" align="center" gutterBottom sx={{ fontWeight: 'bold' }}>
         암 생존자 건강관리 설문
@@ -79,7 +80,7 @@ const Section4Page = () => {
       </Box>
 
       <Paper elevation={3} sx={{ p: 4 }}>
-        <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 ,textAlign:"center"}}>
+        <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, textAlign: "center" }}>
           {steps[currentStep]}
         </Typography>
 
@@ -93,11 +94,11 @@ const Section4Page = () => {
         <Section4Component answers={answers} setAnswers={setAnswers} />
 
         {/* error가 true일 때만 Alert 보이기 */}
-          {error && (
-            <Alert severity="warning" sx={{ mt: 2 }}>
-              <AlertTitle>경고</AlertTitle>
-                모든 문항을 응답해야 다음으로 넘어갈 수 있습니다.
-            </Alert>
+        {error && (
+          <Alert severity="warning" sx={{ mt: 2 }}>
+            <AlertTitle>경고</AlertTitle>
+            모든 문항을 응답해야 다음으로 넘어갈 수 있습니다.
+          </Alert>
         )}
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
