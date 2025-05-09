@@ -8,7 +8,7 @@
 
 ### 🗂️ src 폴더 구조
 ```bash
-.
+.  
 src/
 │
 ├── component/                   # UI 컴포넌트 모음
@@ -36,9 +36,11 @@ src/
 │   └── SurveyResultPage.js      # 결과 페이지 (/survey-result)
 │
 └── utils/                       # 공통 유틸리티 함수
-    └── SurveyUtils.js            # 설문 답안 처리 알고리즘 모아놓은 파일
+    └── SurveyUtils.js           # 설문 답안 처리 알고리즘 모아놓은 파일
+```
 
 ---
+
 ### 사회복지사 웹 페이지 데이터 필요한거 정리 (빠트린거 있으면 추가바람)
 
 | 필드명                | 타입             | 설명                                                         |
