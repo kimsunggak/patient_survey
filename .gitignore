@@ -1,0 +1,11 @@
+myenv
+node_modules/
+build/
+*.log
+logs/
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+.env
+.env.*
