@@ -23,7 +23,7 @@ export function applyReverseScore(answers) {
 export const SectionStats =  {
     "암 이후 내 몸의 변화": { mean: 3.09, sd: 0.95 },
     "건강한 삶을 위한 관리": { mean: 3.63, sd: 0.76 },
-    "회복을 도와주는 사람들": { mean: 3.84, sd: 0.94 },
+    "회복하도록 도와주는 사람들": { mean: 3.84, sd: 0.94 },
     "심리적 부담": { mean: 3.08, sd: 0.91 },
     "사회적 삶의 부담": { mean: 3.39, sd: 1.20 },
     "암 이후 탄력성": { mean: 4.28, sd: 0.72 },
