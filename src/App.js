@@ -37,7 +37,7 @@ function App() {
           <Route path="/section7" element={<Section7Page />} />
 
           {/* 설문 결과 페이지 */}
-+         <Route path="/survey-result" element={<SurveyResultPage />} />
+          <Route path="/survey-result" element={<SurveyResultPage />} />
         </Routes>
       </Router>
     </ThemeProvider>
