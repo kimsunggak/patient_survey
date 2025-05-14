@@ -20,6 +20,7 @@ export const InfoCard = ({ icon, title, description }) => (
   <Paper elevation={3} sx={{
     p: { xs: 2, sm: 3 }, // 반응형 p
     textAlign: 'center',
+    width: '100%', // 카드가 Grid item의 전체 너비를 차지하도록 명시
     height: { xs: 'auto', md: '100%' }, // 모바일에서는 auto, 데스크탑에서는 100%로 카드 높이 통일
     borderRadius: 3,
     minHeight: { xs: 180, sm: 200 }, // 반응형 minHeight 유지

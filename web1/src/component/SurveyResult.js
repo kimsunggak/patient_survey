@@ -65,6 +65,10 @@ const SurveyResult = ({
   const legendFontSize = isMobile ? 9 : 10;
   const legendPadding = isMobile ? 8 : 10;
 
+  // Radar 차트를 위한 반응형 폰트 크기 추가
+  const radarPointLabelFontSize = isMobile ? 8 : 12; // 육각형 주변 텍스트
+  const radarTickLabelFontSize = isMobile ? 7 : 10;  // 방사형 축 눈금 텍스트 (0, 20, ...)
+
   // 1) 데이터 전처리
   const processed = Object.keys(rawScores).map((key) => {
     const value = rawScores[key] ?? 0;
@@ -162,13 +166,31 @@ const SurveyResult = ({
               alignItems: 'center',
               width: '100%',
               mx:'auto',
-              height: { xs: 280, sm: 350, md: 400 }, // 모바일 높이 약간 줄임
+              height: { xs: 320, sm: 350, md: 400 }, // 모바일 높이 증가 (280 -> 320)
               maxWidth: { xs: '100%', sm: 550, md: 700 }, // 모바일 최대 너비 조정
             }}>
               <Radar data={radarData} options={{
                 responsive: true,
                 maintainAspectRatio: false,
-                scales: { r: { suggestedMin: 0, suggestedMax: 100, ticks: { backdropPadding: { x: 10, y: 5 } } } }, // 레이더 차트 눈금 패딩 추가
+                scales: { 
+                  r: { 
+                    suggestedMin: 0, 
+                    suggestedMax: 100, 
+                    ticks: { 
+                      backdropPadding: { x: 10, y: 5 },
+                      font: {
+                        size: radarTickLabelFontSize // 반응형 폰트 적용
+                      }
+                    },
+                    pointLabels: { // 포인트 라벨 설정 추가
+                      font: {
+                        size: radarPointLabelFontSize // 반응형 폰트 적용
+                      },
+                      // 필요시 라벨과 포인트/가장자리 사이 간격 조정
+                      // padding: isMobile ? 3 : 5 
+                    }
+                  } 
+                }, // 레이더 차트 눈금 패딩 추가
                 plugins: {
                   legend: {
                     labels: {
