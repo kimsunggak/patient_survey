@@ -131,23 +131,23 @@ const SurveyResult = ({
   );
 
   return (
-    <Box sx={{ backgroundColor: 'background.default', py: 6 }}>
-      <Container maxWidth="lg">
+    <Box sx={{ backgroundColor: 'background.default', py: { xs: 2, sm: 4, md: 6 } }}> {/* py 반응형으로 수정 */}
+      <Container maxWidth="lg"> {/* maxWidth는 유지하되, 내부 요소들이 반응하도록 */}
 
         {/* 전체를 감싸는 하얀 배경 */}
-        <Paper elevation={3} sx={{ p: 4, borderRadius: 3 }}>
+        <Paper elevation={3} sx={{ p: { xs: 2, sm: 3, md: 4 }, borderRadius: 3 }}> {/* p 반응형으로 수정 */}
 
           {/* 타이틀 & 설명 */}
-          <Typography variant="h5" align="center" sx={{ fontWeight: 'bold', mb: 1, color: 'primary.main' }}>
+          <Typography variant="h5" align="center" sx={{ fontWeight: 'bold', mb: 1, color: 'primary.main', fontSize: { xs: '1.5rem', sm: '2rem' } }}> {/* fontSize 반응형 */}
             건강 관리 결과
           </Typography>
-          <Typography variant="body2" align="center" sx={{ mb: 4 }} color="text.secondary">
+          <Typography variant="body2" align="center" sx={{ mb: { xs: 2, sm: 3, md: 4 }, fontSize: { xs: '0.8rem', sm: '1rem'} }} color="text.secondary"> {/* mb, fontSize 반응형 */}
             현재 상태를 시각적으로 확인하고, 집중 관리가 필요한 영역과 추천 사항을 확인하세요.
           </Typography>
 
           {/* 1. 영역별 점수 비교 */}
-          <Paper elevation={2} sx={{ p: 5, mb: 4 }}>
-            <Typography variant="h6" align="center" sx={{ fontWeight: 'bold', mb: 3, color: 'primary.dark' }}>
+          <Paper elevation={2} sx={{ p: { xs: 2, sm: 3, md: 5 }, mb: 4 }}> {/* p 반응형 */}
+            <Typography variant="h6" align="center" sx={{ fontWeight: 'bold', mb: 3, color: 'primary.dark', fontSize: { xs: '1.2rem', sm: '1.5rem' } }}> {/* fontSize 반응형 */}
               영역별 점수 비교
             </Typography>
             <Box sx={{
@@ -156,20 +156,30 @@ const SurveyResult = ({
               alignItems: 'center',
               width: '100%',
               mx:'auto',
-              height: 400,
-              maxWidth: 800,
+              height: { xs: 300, sm: 350, md: 400 }, // height 반응형
+              maxWidth: { xs: '100%', sm: 600, md: 800 }, // maxWidth 반응형
             }}>
               <Radar data={radarData} options={{
                 responsive: true,
                 maintainAspectRatio: false,
-                scales: { r: { suggestedMin: 0, suggestedMax: 100 } }
+                scales: { r: { suggestedMin: 0, suggestedMax: 100 } },
+                plugins: { // 모바일에서 범례가 너무 클 경우 조정
+                  legend: {
+                    labels: {
+                      boxWidth: 10, // 범례 아이콘 크기
+                      font: {
+                        size: 10 // 범례 폰트 크기
+                      }
+                    }
+                  }
+                }
               }} />
             </Box>
           </Paper>
 
           {/* 2. 카테고리별 점수 */}
-          <Paper elevation={2} sx={{ p: 5, mb: 4 }}>
-            <Typography variant="h6" align="center" sx={{ fontWeight: 'bold', mb: 3 , color: 'primary.dark'}}>
+          <Paper elevation={2} sx={{ p: { xs: 2, sm: 3, md: 5 }, mb: 4 }}> {/* p 반응형 */}
+            <Typography variant="h6" align="center" sx={{ fontWeight: 'bold', mb: 3 , color: 'primary.dark', fontSize: { xs: '1.2rem', sm: '1.5rem' } }}> {/* fontSize 반응형 */}
               카테고리별 점수
             </Typography>
             <Box sx={{
@@ -177,30 +187,45 @@ const SurveyResult = ({
               justifyContent: 'center',
               alignItems: 'center',
               width: '100%',
-              height: 500,
-              maxWidth: 800,
+              height: { xs: 350, sm: 400, md: 500 }, // height 반응형
+              maxWidth: { xs: '100%', sm: 600, md: 800 }, // maxWidth 반응형
               mx:'auto'
             }}>
-              <Bar data={barData} options={barOptions} />
+              <Bar data={barData} options={{...barOptions, // 기존 옵션 유지
+                plugins: { // 모바일에서 범례가 너무 클 경우 조정
+                  legend: {
+                    position: 'top',
+                    labels: {
+                      boxWidth: 10,
+                      font: {
+                        size: 10
+                      }
+                    }
+                  }
+                },
+                scales: { // 모바일에서 y축 간격 조정
+                  y: { beginAtZero: true, max: 100, ticks: { stepSize: 20 } } // stepSize 변경
+                }
+              }} />
             </Box>
           </Paper>
 
           {/* 3. 피드백 카드 그리드 */}
           <Grid container spacing={2} direction="column">
-            {/* 전체 피드백 카드 (연두색 영역) */}
+            {/* 전체 피드백 카드 */}
             <Grid item xs={12} >
               <Paper elevation={1} sx={{
-                p: 3,
-                borderLeft: `4px solid #ffffff`,
+                p: { xs: 2, sm: 3 }, // p 반응형
+                borderLeft: `4px solid #ffffff`, // 이 부분은 디자인에 따라 유지하거나 수정
                 height: '100%'
               }}>
-                <Typography variant="subtitle1" align="center" sx={{ fontWeight: 'bold', mb: 1, color: 'primary.dark' }}>
+                <Typography variant="subtitle1" align="center" sx={{ fontWeight: 'bold', mb: 1, color: 'primary.dark', fontSize: { xs: '1rem', sm: '1.25rem' } }}> {/* fontSize 반응형 */}
                   전체 피드백
                 </Typography>
-                <Typography variant="subtitle2" align="center" sx={{ mb: .5 }}>
+                <Typography variant="subtitle2" align="center" sx={{ mb: .5, fontSize: { xs: '0.9rem', sm: '1rem' } }}> {/* fontSize 반응형 */}
                   {overallRiskGroup}
                 </Typography>
-                <Typography variant="body2" align="center" color="text.secondary">
+                <Typography variant="body2" align="center" color="text.secondary" sx={{ fontSize: { xs: '0.8rem', sm: '0.9rem' } }}> {/* fontSize 반응형 */}
                   {overallFeedback}
                 </Typography>
               </Paper>
@@ -209,11 +234,11 @@ const SurveyResult = ({
             {/* ★ 추가 피드백 – 하나의 영역으로 통합 */}
             {additionalComments.length > 0 && (
               <Grid item xs={12}>
-                <Paper elevation={1} sx={{ p: 3, borderLeft:'4px solid #ffffff' }}>
+                <Paper elevation={1} sx={{ p: { xs: 2, sm: 3 }, borderLeft:'4px solid #ffffff' }}> {/* p 반응형 */}
                   <Typography
                     variant="subtitle1"
                     align="center"
-                    sx={{ fontWeight:'bold', mb:1, color:'primary.dark' }}
+                    sx={{ fontWeight:'bold', mb:1, color:'primary.dark', fontSize: { xs: '1rem', sm: '1.25rem' } }} /* fontSize 반응형 */
                   >
                     추가 피드백
                   </Typography>
@@ -227,7 +252,8 @@ const SurveyResult = ({
                           style === "error"   ? "error.main"   :
                           style === "info"    ? "primary.main" :
                           style === "success" ? "success.main" : "text.primary",
-                        fontWeight:'bold'
+                        fontWeight:'bold',
+                        fontSize: { xs: '0.8rem', sm: '0.9rem' } /* fontSize 반응형 */
                       }}
                     >
                       {text}

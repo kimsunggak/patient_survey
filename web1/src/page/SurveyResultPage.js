@@ -90,7 +90,7 @@ const SurveyResultPage = () => {
       <Box mt={4} display="flex" justifyContent="center">
         <Button
           variant="contained"
-          href="/"
+          href="/patient_survey/web1/"
           sx={{ px: 6, py: 2, fontSize: '1.1rem', fontWeight: 'bold', borderRadius: 1 }}
         >
           홈으로 가기
