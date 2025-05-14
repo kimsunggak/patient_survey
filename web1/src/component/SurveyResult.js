@@ -59,6 +59,12 @@ const SurveyResult = ({
   answers = {},
   riskByMean = {} // ← 추가
 }) => {
+  // 차트 옵션에 반응형 객체 대신 JS 분기 사용
+  const isMobile = typeof window !== 'undefined' ? window.innerWidth < 600 : false;
+  const legendBoxWidth = isMobile ? 8 : 10;
+  const legendFontSize = isMobile ? 9 : 10;
+  const legendPadding = isMobile ? 8 : 10;
+
   // 1) 데이터 전처리
   const processed = Object.keys(rawScores).map((key) => {
     const value = rawScores[key] ?? 0;
@@ -166,11 +172,9 @@ const SurveyResult = ({
                 plugins: {
                   legend: {
                     labels: {
-                      boxWidth: { xs: 8, sm: 10 }, // 반응형 범례 아이콘
-                      font: {
-                        size: { xs: 9, sm: 10 } // 반응형 범례 폰트
-                      },
-                      padding: { xs: 8, sm: 10 } // 반응형 범례 패딩
+                      boxWidth: legendBoxWidth,
+                      font: { size: legendFontSize },
+                      padding: legendPadding
                     }
                   }
                 }
@@ -199,17 +203,15 @@ const SurveyResult = ({
                   legend: {
                     position: 'top',
                     labels: {
-                      boxWidth: { xs: 8, sm: 10 }, // 반응형 범례 아이콘
-                      font: {
-                        size: { xs: 9, sm: 10 } // 반응형 범례 폰트
-                      },
-                      padding: { xs: 8, sm: 10 } // 반응형 범례 패딩
+                      boxWidth: legendBoxWidth,
+                      font: { size: legendFontSize },
+                      padding: legendPadding
                     }
                   }
                 },
                 scales: { // 모바일에서 y축 간격 조정
-                  y: { beginAtZero: true, max: 100, ticks: { stepSize: 20, font: { size: { xs: 9, sm: 10 } } } }, // y축 폰트 반응형
-                  x: { ticks: { font: { size: { xs: 8, sm: 9 } } } } // x축 폰트 반응형
+                  y: { beginAtZero: true, max: 100, ticks: { stepSize: 20, font: { size: legendFontSize } } }, // y축 폰트 반응형
+                  x: { ticks: { font: { size: legendFontSize } } } // x축 폰트 반응형
                 }
               }} />
             </Box>

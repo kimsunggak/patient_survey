@@ -20,9 +20,9 @@ export const InfoCard = ({ icon, title, description }) => (
   <Paper elevation={3} sx={{
     p: { xs: 2, sm: 3 }, // 반응형 p
     textAlign: 'center',
-    flex: 1,
+    height: { xs: 'auto', md: '100%' }, // 모바일에서는 auto, 데스크탑에서는 100%로 카드 높이 통일
     borderRadius: 3,
-    minHeight: { xs: 180, sm: 200 }, // 반응형 minHeight
+    minHeight: { xs: 180, sm: 200 }, // 반응형 minHeight 유지
     display: 'flex', // Flexbox 추가
     flexDirection: 'column', // 세로 정렬
     justifyContent: 'center' // 가운데 정렬
