@@ -156,20 +156,21 @@ const SurveyResult = ({
               alignItems: 'center',
               width: '100%',
               mx:'auto',
-              height: { xs: 300, sm: 350, md: 400 }, // height 반응형
-              maxWidth: { xs: '100%', sm: 600, md: 800 }, // maxWidth 반응형
+              height: { xs: 280, sm: 350, md: 400 }, // 모바일 높이 약간 줄임
+              maxWidth: { xs: '100%', sm: 550, md: 700 }, // 모바일 최대 너비 조정
             }}>
               <Radar data={radarData} options={{
                 responsive: true,
                 maintainAspectRatio: false,
-                scales: { r: { suggestedMin: 0, suggestedMax: 100 } },
-                plugins: { // 모바일에서 범례가 너무 클 경우 조정
+                scales: { r: { suggestedMin: 0, suggestedMax: 100, ticks: { backdropPadding: { x: 10, y: 5 } } } }, // 레이더 차트 눈금 패딩 추가
+                plugins: {
                   legend: {
                     labels: {
-                      boxWidth: 10, // 범례 아이콘 크기
+                      boxWidth: { xs: 8, sm: 10 }, // 반응형 범례 아이콘
                       font: {
-                        size: 10 // 범례 폰트 크기
-                      }
+                        size: { xs: 9, sm: 10 } // 반응형 범례 폰트
+                      },
+                      padding: { xs: 8, sm: 10 } // 반응형 범례 패딩
                     }
                   }
                 }
@@ -187,24 +188,28 @@ const SurveyResult = ({
               justifyContent: 'center',
               alignItems: 'center',
               width: '100%',
-              height: { xs: 350, sm: 400, md: 500 }, // height 반응형
-              maxWidth: { xs: '100%', sm: 600, md: 800 }, // maxWidth 반응형
+              height: { xs: 300, sm: 400, md: 500 }, // 모바일 높이 약간 줄임
+              maxWidth: { xs: '100%', sm: 550, md: 700 }, // 모바일 최대 너비 조정
               mx:'auto'
             }}>
               <Bar data={barData} options={{...barOptions, // 기존 옵션 유지
+                responsive: true, // 추가
+                maintainAspectRatio: false, // 추가
                 plugins: { // 모바일에서 범례가 너무 클 경우 조정
                   legend: {
                     position: 'top',
                     labels: {
-                      boxWidth: 10,
+                      boxWidth: { xs: 8, sm: 10 }, // 반응형 범례 아이콘
                       font: {
-                        size: 10
-                      }
+                        size: { xs: 9, sm: 10 } // 반응형 범례 폰트
+                      },
+                      padding: { xs: 8, sm: 10 } // 반응형 범례 패딩
                     }
                   }
                 },
                 scales: { // 모바일에서 y축 간격 조정
-                  y: { beginAtZero: true, max: 100, ticks: { stepSize: 20 } } // stepSize 변경
+                  y: { beginAtZero: true, max: 100, ticks: { stepSize: 20, font: { size: { xs: 9, sm: 10 } } } }, // y축 폰트 반응형
+                  x: { ticks: { font: { size: { xs: 8, sm: 9 } } } } // x축 폰트 반응형
                 }
               }} />
             </Box>

@@ -36,20 +36,21 @@ const goToSurvey = () => {
         maxWidth="md"
         sx={{
           flexGrow: 1,
-          py: 6,
+          py: { xs: 3, sm: 4, md: 6 }, // 반응형 py
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
         }}
       >
         <HeaderSection />
-        <Paper elevation={6} sx={{ borderRadius: 4, p: 5 }}>
+        <Paper elevation={6} sx={{ borderRadius: 4, p: { xs: 2, sm: 3, md: 5 } }}> {/* 반응형 p */}
           <Typography
             variant="body1"
             align="center"
             color="textPrimary"
             fontWeight={550}
-            mb={3}
+            mb={{ xs: 2, sm: 3 }} // 반응형 mb
+            sx={{ fontSize: { xs: '0.875rem', sm: '1rem' } }} // 반응형 fontSize
           >
             <strong>당신은 혼자가 아닙니다.</strong>  <br/>
             이 서비스는 암 진단 이후의 건강 관리, 심리적 회복과 일상 복귀를 지원하기 위해 만들어졌습니다.
