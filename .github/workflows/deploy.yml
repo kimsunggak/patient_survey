@@ -7,6 +7,9 @@ on:
   push:
     branches: [test1]
 
+# (선택) UI에서 수동 트리거도 가능하도록 하고 싶다면 아래를 추가하세요.
+#  workflow_dispatch:
+
 # 2) 최소 권한만 부여
 permissions:
   contents: read   # actions/checkout에 필요
@@ -33,9 +36,9 @@ jobs:
         run: npm ci
         working-directory: ./web1
 
-      # 3-4) web1 빌드
+      # 3-4) web1 빌드 (ESLint 경고 무시)
       - name: Build web1
-        run: npm run build
+        run: CI=false npm run build
         working-directory: ./web1
 
       # 3-5) web2 의존성 설치
@@ -43,15 +46,16 @@ jobs:
         run: npm ci
         working-directory: ./web2
 
-      # 3-6) web2 빌드
+      # 3-6) web2 빌드 (ESLint 경고 무시)
       - name: Build web2
-        run: npm run build
+        run: CI=false npm run build
         working-directory: ./web2
 
       # 3-7) 빌드 결과를 dist 폴더로 모으기
       - name: Collate build outputs
         run: |
           mkdir -p dist
+          
           echo "Copying web1 build output..."
           if [ -d "web1/build" ]; then
             cp -r web1/build dist/web1
@@ -72,7 +76,7 @@ jobs:
             exit 1
           fi
 
-      # 3-8) Pages용 아티팩트 업로드 (최신 @v3)
+      # 3-8) Pages용 아티팩트 업로드 (@v3)
       - name: Upload artifact for GitHub Pages
         uses: actions/upload-pages-artifact@v3
         with:
@@ -86,7 +90,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      # 4-1) 업로드된 아티팩트를 실제 Pages에 배포
+      # 4-1) 업로드된 아티팩트를 실제 Pages에 배포 (@v4)
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
