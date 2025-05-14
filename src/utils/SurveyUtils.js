@@ -156,18 +156,18 @@ const FEEDBACK_RULES = [
     id: "alcohol_warning",
     condition: (a) => {
       const v = Number(a.q32);          // "3" → 3
-      return v >= 3;                    // 3·4·5이면 true
+      return v <= 3;                    // 1·2·3이면 true
     },
     comment: "🍺 술은 암 재발 위험을 높일 수 있습니다. 금주를 권장합니다.",
     style: "warning"
   },
 
-  /* 7-B. 암 이후 ‘금연’ 문항이 3·4·5 → 금연 권장 */
+  /* 7-B. 암 이후 ‘금연’ 문항이 1·2·3 → 금연 권장 */
   {
     id: "smoke_warning",
     condition: (a) => {
       const v = Number(a.q33);
-      return v >= 3;
+      return v <= 3;
     },
     comment: "🚭 담배는 암 재발 위험을 높일 수 있습니다. 금연을 권장합니다.",
     style: "warning"

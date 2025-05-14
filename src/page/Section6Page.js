@@ -25,7 +25,8 @@ const steps = [
 const Section6Page = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [answers, setAnswers] = useState(location.state?.answers || {});
+  const userName = location.state?.userName; // Retrieve userName
+  const [answers, setAnswers] = useState(location.state?.answers || {}); // Retrieve and initialize answers
   const [error, setError] = useState(false);
 
   const total = 3;  // Q29~Q31
@@ -35,11 +36,17 @@ const Section6Page = () => {
 
   const handleNext = () => {
     if (done < total) return setError(true);
-    navigate('/section7', { state: { answers } });
+    navigate('/section7', { state: { userName, answers } }); // Pass userName and answers
   };
+
+  const handlePrev = () => {
+    navigate('/section5', { state: { userName, answers } }); // Pass userName and answers
+  };
+
   useEffect(() => {
     if (done === total) setError(false);
   }, [done]);
+
   return (
     <Container maxWidth="md" sx={{ py: 4, background: 'none',
       bgcolor: 'background.default' }}>
@@ -99,7 +106,7 @@ const Section6Page = () => {
         )}
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-          <Button variant="outlined" onClick={() => navigate('/section5')}>
+          <Button variant="outlined" onClick={handlePrev}>
             이전
           </Button>
           <Button variant="contained" onClick={handleNext}>

@@ -11,6 +11,7 @@ import {
   LinearProgress
 } from '@mui/material';
 import Section7Component from '../component/Section7Component';
+import { saveUserAnswers } from '../utils/firebaseUtils'; // 추가
 
 const steps = [
   '암 이후 내 몸의 변화',
@@ -26,6 +27,7 @@ const Section7Page = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [answers, setAnswers] = useState(location.state?.answers || {});
+  const userName = location.state?.userName; // userName 가져오기
   const [error, setError] = useState(false);
 
   const total = 2;  // Q32~Q33
@@ -33,9 +35,21 @@ const Section7Page = () => {
   const progress = (done / total) * 100;
   const currentStep = 6;
 
-  const handleNext = () => {
+  const handleNext = async () => { // async 추가
     if (done < total) return setError(true);
-    navigate('/survey-result', { state: { answers } });
+    if (!userName) {
+      alert("사용자 정보가 없습니다. 처음부터 다시 시도해주세요.");
+      navigate('/'); // 홈으로 이동 또는 다른 적절한 처리
+      return;
+    }
+    try {
+      await saveUserAnswers(userName, answers); // 설문 답변 저장
+      console.log("설문 답변 저장 완료 for:", userName);
+      navigate('/survey-result', { state: { userName, answers } }); // 결과 페이지로 userName과 answers 전달
+    } catch (e) {
+      console.error("설문 답변 저장 실패:", e);
+      alert("답변 저장에 실패했습니다. 다시 시도해주세요.");
+    }
   };
 
   useEffect(() => {

@@ -26,6 +26,7 @@ const Section1Page = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [answers, setAnswers] = useState(location.state?.answers || {});
+  const userName = location.state?.userName; // userName 가져오기
   const [error, setError] = useState(false);
 
   const total = 8;  // Q1~Q8
@@ -35,7 +36,7 @@ const Section1Page = () => {
 
   const handleNext = () => {
     if (done < total) return setError(true);
-    navigate('/section2', { state: { answers } });
+    navigate('/section2', { state: { userName, answers } }); // userName과 answers 전달
   };
   useEffect(() => {
     if (done === total) setError(false);

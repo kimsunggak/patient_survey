@@ -25,6 +25,7 @@ const steps = [
 const Section2Page = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const userName = location.state?.userName; // Retrieve userName
   // answers 초기값 보정: q12_reasons 항상 배열로
   const defaultAnswers = {
     q9: '',
@@ -76,7 +77,11 @@ const Section2Page = () => {
       setError(true);
       return;
     }
-    navigate('/section3', { state: { answers } });
+    navigate('/section3', { state: { userName, answers } }); // Pass userName and answers
+  };
+
+  const handlePrev = () => {
+    navigate('/section1', { state: { userName, answers } }); // Pass userName and answers
   };
 
   useEffect(() => {
@@ -143,7 +148,7 @@ const Section2Page = () => {
         )}
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-          <Button variant="outlined" onClick={() => navigate('/section1')}>이전</Button>
+          <Button variant="outlined" onClick={handlePrev}>이전</Button>
           <Button variant="contained" onClick={handleNext}>다음</Button>
         </Box>
       </Paper>
