@@ -57,12 +57,12 @@ const SurveyResult = ({
   overallFeedback = "",
   overallRiskGroup = "",
   answers = {},
-  riskByMean = {} // ← 추가
+  riskByMean = {}
 }) => {
   // 1) 데이터 전처리
   const processed = Object.keys(rawScores).map((key) => {
     const value = rawScores[key] ?? 0;
-    const mean  = meanScores[key] ?? 0;
+    const mean = meanScores[key] ?? 0;
     const included = key !== 'lifestyle';
     const sectionName = labelMap[key];
     return {
@@ -77,28 +77,36 @@ const SurveyResult = ({
     };
   });
 
+  // 전체 점수 계산
+  const totalScore = processed
+    .filter((p) => p.included)
+    .reduce((sum, p) => sum + p.stdScore, 0) /
+    processed.filter((p) => p.included).length;
+
   // 디버깅: mean, stdScore 값 콘솔 출력
-  console.table(processed.map(({ key, mean, stdScore }) => ({ key, mean, stdScore })));
+  console.table(
+    processed.map(({ key, mean, stdScore }) => ({ key, mean, stdScore }))
+  );
 
   // 2) 레이더 차트 데이터
   const radarData = {
-    labels: processed.filter(p => p.included).map(p => p.label),
-    datasets: [{
-      label: '표준화 점수',
-      data: processed.filter(p => p.included).map(p => p.stdScore),
-      backgroundColor: 'rgba(25, 118, 210, 0.2)',
-      borderColor: 'rgba(25, 118, 210, 1)',
-      borderWidth: 2,
-      pointBackgroundColor: 'rgba(25, 118, 210, 1)'
-    }]
+    labels: processed.filter((p) => p.included).map((p) => p.label),
+    datasets: [
+      {
+        label: '표준화 점수',
+        data: processed.filter((p) => p.included).map((p) => p.stdScore),
+        backgroundColor: 'rgba(25, 118, 210, 0.2)',
+        borderColor: 'rgba(25, 118, 210, 1)',
+        borderWidth: 2,
+        pointBackgroundColor: 'rgba(25, 118, 210, 1)'
+      }
+    ]
   };
 
   // 3) 막대 차트 데이터
-  const cats = processed.filter(p => p.included);
-  const labels = cats.map(p => p.label);
-  // ① 파란 막대: **T-score**(0~100)
-  const myScores = cats.map(p => p.stdScore ?? 0);
-  // ② 회색 막대: **기준선 50**(T-score 평균)
+  const cats = processed.filter((p) => p.included);
+  const labels = cats.map((p) => p.label);
+  const myScores = cats.map((p) => p.stdScore ?? 0);
   const avgScores = cats.map(() => 50);
   const barData = {
     labels,
@@ -133,71 +141,129 @@ const SurveyResult = ({
   return (
     <Box sx={{ backgroundColor: 'background.default', py: 6 }}>
       <Container maxWidth="lg">
-
         {/* 전체를 감싸는 하얀 배경 */}
         <Paper elevation={3} sx={{ p: 4, borderRadius: 3 }}>
-
           {/* 타이틀 & 설명 */}
-          <Typography variant="h5" align="center" sx={{ fontWeight: 'bold', mb: 1, color: 'primary.main' }}>
+          <Typography
+            variant="h5"
+            align="center"
+            sx={{ fontWeight: 'bold', mb: 1, color: 'primary.main' }}
+          >
             건강 관리 결과
           </Typography>
-          <Typography variant="body2" align="center" sx={{ mb: 4 }} color="text.secondary">
+          <Typography
+            variant="body2"
+            align="center"
+            sx={{ mb: 4 }}
+            color="text.secondary"
+          >
             현재 상태를 시각적으로 확인하고, 집중 관리가 필요한 영역과 추천 사항을 확인하세요.
           </Typography>
 
           {/* 1. 영역별 점수 비교 */}
           <Paper elevation={2} sx={{ p: 5, mb: 4 }}>
-            <Typography variant="h6" align="center" sx={{ fontWeight: 'bold', mb: 3, color: 'primary.dark' }}>
+            <Typography
+              variant="h6"
+              align="center"
+              sx={{ fontWeight: 'bold', mb: 3, color: 'primary.dark' }}
+            >
               영역별 점수 비교
             </Typography>
-            <Box sx={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              width: '100%',
-              mx:'auto',
-              height: 400,
-              maxWidth: 800,
-            }}>
-              <Radar data={radarData} options={{
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: { r: { suggestedMin: 0, suggestedMax: 100 } }
-              }} />
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                width: '100%',
+                mx: 'auto',
+                height: 400,
+                maxWidth: 800,
+                position: 'relative'
+              }}
+            >
+              <Radar
+                data={radarData}
+                options={{
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  scales: { r: { suggestedMin: 0, suggestedMax: 100 } }
+                }}
+              />
             </Box>
           </Paper>
 
           {/* 2. 카테고리별 점수 */}
           <Paper elevation={2} sx={{ p: 5, mb: 4 }}>
-            <Typography variant="h6" align="center" sx={{ fontWeight: 'bold', mb: 3 , color: 'primary.dark'}}>
+            <Typography
+              variant="h6"
+              align="center"
+              sx={{ fontWeight: 'bold', mb: 3, color: 'primary.dark' }}
+            >
               카테고리별 점수
             </Typography>
-            <Box sx={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              width: '100%',
-              height: 500,
-              maxWidth: 800,
-              mx:'auto'
-            }}>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                width: '100%',
+                height: 500,
+                maxWidth: 800,
+                mx: 'auto'
+              }}
+            >
               <Bar data={barData} options={barOptions} />
             </Box>
           </Paper>
 
+          {/* 전체 점수 표시 */}
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              mb: 4,
+              width: '100%'
+            }}
+          >
+            <Paper
+              elevation={3}
+              sx={{
+                p: 3,
+                backgroundColor: 'white',
+                borderRadius: 2,
+                width: '100%',
+                textAlign: 'center'
+              }}
+            >
+              <Typography
+                variant="subtitle1"
+                sx={{ fontWeight: 'bold', color: 'primary.dark', mb: 1 }}
+              >
+                전체 점수
+              </Typography>
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: 'bold', color: 'text.primary' }}
+              >
+                {Math.round(totalScore)}점
+              </Typography>
+            </Paper>
+          </Box>
+
           {/* 3. 피드백 카드 그리드 */}
           <Grid container spacing={2} direction="column">
-            {/* 전체 피드백 카드 (연두색 영역) */}
-            <Grid item xs={12} >
-              <Paper elevation={1} sx={{
-                p: 3,
-                borderLeft: `4px solid #ffffff`,
-                height: '100%'
-              }}>
-                <Typography variant="subtitle1" align="center" sx={{ fontWeight: 'bold', mb: 1, color: 'primary.dark' }}>
+            {/* 전체 피드백 카드 */}
+            <Grid item xs={12}>
+              <Paper elevation={1} sx={{ p: 3, borderLeft: '4px solid #ffffff', height: '100%' }}>
+                <Typography
+                  variant="subtitle1"
+                  align="center"
+                  sx={{ fontWeight: 'bold', mb: 1, color: 'primary.dark' }}
+                >
                   전체 피드백
                 </Typography>
-                <Typography variant="subtitle2" align="center" sx={{ mb: .5 }}>
+                <Typography variant="subtitle2" align="center" sx={{ mb: 0.5 }}>
                   {overallRiskGroup}
                 </Typography>
                 <Typography variant="body2" align="center" color="text.secondary">
@@ -206,14 +272,14 @@ const SurveyResult = ({
               </Paper>
             </Grid>
 
-            {/* ★ 추가 피드백 – 하나의 영역으로 통합 */}
+            {/* 추가 피드백 카드 */}
             {additionalComments.length > 0 && (
               <Grid item xs={12}>
-                <Paper elevation={1} sx={{ p: 3, borderLeft:'4px solid #ffffff' }}>
+                <Paper elevation={1} sx={{ p: 3, borderLeft: '4px solid #ffffff' }}>
                   <Typography
                     variant="subtitle1"
                     align="center"
-                    sx={{ fontWeight:'bold', mb:1, color:'primary.dark' }}
+                    sx={{ fontWeight: 'bold', mb: 1, color: 'primary.dark' }}
                   >
                     추가 피드백
                   </Typography>
@@ -222,12 +288,17 @@ const SurveyResult = ({
                       key={idx}
                       variant="body2"
                       align="center"
-                      sx={{ mb: .5,
+                      sx={{
+                        mb: 0.5,
                         color:
-                          style === "error"   ? "error.main"   :
-                          style === "info"    ? "primary.main" :
-                          style === "success" ? "success.main" : "text.primary",
-                        fontWeight:'bold'
+                          style === 'error'
+                            ? 'error.main'
+                            : style === 'info'
+                            ? 'primary.main'
+                            : style === 'success'
+                            ? 'success.main'
+                            : 'text.primary',
+                        fontWeight: 'bold'
                       }}
                     >
                       {text}
@@ -237,7 +308,6 @@ const SurveyResult = ({
               </Grid>
             )}
           </Grid>
-
         </Paper>
       </Container>
     </Box>
