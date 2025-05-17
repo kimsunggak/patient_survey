@@ -5,9 +5,12 @@ import {
   Select, Button, Grid, Checkbox, FormGroup, FormControlLabel, Box, Paper, Divider
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { saveUserData } from '../utils/firebaseUtils'; // 추가
 
 const SurveyForm = () => {
   const navigate = useNavigate();
+  const [name, setName] = useState(''); // 이름 상태 추가
+  const [birthDate, setBirthDate] = useState(''); // 생년월일 상태 추가
   const [gender, setGender] = useState('');
   const [diagnosisDate, setDiagnosisDate] = useState('');
   const [cancerType, setCancerType] = useState('');
@@ -25,9 +28,33 @@ const SurveyForm = () => {
     );
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => { // async 추가
     e.preventDefault();
-    navigate('/section1');
+    // 기본 정보 저장 (이름 필드가 채워졌는지 간단히 확인)
+    if (!name.trim()) {
+      alert("이름을 입력해주세요.");
+      return;
+    }
+    const userInfo = {
+      name,
+      birthDate, // 생년월일 추가
+      gender,
+      diagnosisDate,
+      cancerType: cancerType === '기타' ? otherCancerType : cancerType,
+      treatmentTypes: treatmentTypes.includes('기타') ? [...treatmentTypes.filter(t => t !== '기타'), otherTreatmentType] : treatmentTypes,
+      currentTreatment,
+      mentalHealthHistory,
+      physicalLimitations,
+      // 다른 개인 정보 필드들도 여기에 포함
+    };
+    try {
+      await saveUserData(userInfo); // 사용자 기본 정보 저장
+      console.log("사용자 기본 정보 저장 완료:", name);
+      navigate('/section1', { state: { userName: name, answers: {} } }); // userName과 초기 answers 전달
+    } catch (error) {
+      console.error("사용자 기본 정보 저장 실패:", error);
+      alert("기본 정보 저장에 실패했습니다. 다시 시도해주세요.");
+    }
   };
 
   return (
@@ -48,10 +75,23 @@ const SurveyForm = () => {
 
           <Grid container spacing={2} direction="column">
             <Grid item xs={12} >
-              <TextField label="이름" placeholder="이름을 입력하세요" fullWidth />
+              <TextField
+                label="이름"
+                placeholder="이름을 입력하세요"
+                fullWidth
+                value={name} // value 바인딩
+                onChange={(e) => setName(e.target.value)} // onChange 핸들러
+              />
             </Grid>
             <Grid item xs={12} >
-              <TextField fullWidth label="생년월일" type="date" InputLabelProps={{ shrink: true }} />
+              <TextField
+                fullWidth
+                label="생년월일"
+                type="date"
+                InputLabelProps={{ shrink: true }}
+                value={birthDate} // value 바인딩
+                onChange={(e) => setBirthDate(e.target.value)} // onChange 핸들러
+              />
             </Grid>
             <Grid item xs={12} >
               <TextField label="나이" placeholder="나이를 입력하세요" fullWidth type="number" />
@@ -111,11 +151,11 @@ const SurveyForm = () => {
           <Divider sx={{ mb: 2 }} />
 
           <Box sx={{ mt: 3 }}>
-  <Typography variant="subtitle1" fontWeight="bold" color="#003366" gutterBottom>
-    받은 치료 유형 (해당하는 모든 항목 선택)
-  </Typography>
+            <Typography variant="subtitle1" fontWeight="bold" color="#003366" gutterBottom>
+              받은 치료 유형 (해당하는 모든 항목 선택)
+            </Typography>
 
-  <FormGroup>
+            <FormGroup>
               {['수술', '항암화학요법', '방사선 치료', '호르몬 치료', '면역 치료', '표적 치료'].map((treatment) => (
                 <FormControlLabel
                   key={treatment}
@@ -132,35 +172,34 @@ const SurveyForm = () => {
               ))}
             </FormGroup>
 
-  {/* 기타 항목 */}
-  <Box sx={{ mb: 3 }}>
-    <FormGroup>
-      <FormControlLabel
-        control={
-          <Checkbox
-            checked={treatmentTypes.includes('기타')}
-            onChange={handleTreatmentChange}
-            value="기타"
-            sx={{ transform: 'scale(1.2)' }}
-          />
-        }
-        label={<Typography sx={{ fontSize: '1rem' }}>기타</Typography>}
-      />
-    </FormGroup>
+            {/* 기타 항목 */}
+            <Box sx={{ mb: 3 }}>
+              <FormGroup>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={treatmentTypes.includes('기타')}
+                      onChange={handleTreatmentChange}
+                      value="기타"
+                      sx={{ transform: 'scale(1.2)' }}
+                    />
+                  }
+                  label={<Typography sx={{ fontSize: '1rem' }}>기타</Typography>}
+                />
+              </FormGroup>
 
-    {treatmentTypes.includes('기타') && (
-      <TextField
-        fullWidth
-        label="기타 치료 유형을 입력하세요"
-        placeholder="예: 고강도 초음파 치료"
-        value={otherTreatmentType}
-        onChange={(e) => setOtherTreatmentType(e.target.value)}
-        sx={{ mt: 1 }}
-      />
-    )}
-  </Box>
-</Box>
-
+              {treatmentTypes.includes('기타') && (
+                <TextField
+                  fullWidth
+                  label="기타 치료 유형을 입력하세요"
+                  placeholder="예: 고강도 초음파 치료"
+                  value={otherTreatmentType}
+                  onChange={(e) => setOtherTreatmentType(e.target.value)}
+                  sx={{ mt: 1 }}
+                />
+              )}
+            </Box>
+          </Box>
 
           <Grid container spacing={2} direction="column" >
             <Grid item xs={12} >
@@ -170,7 +209,6 @@ const SurveyForm = () => {
                   <MenuItem value="치료 전">아직 치료를 시작하지 않음</MenuItem>
                   <MenuItem value="치료 중">지금 치료를 받고 있음(수술,항암,방사선,약물치료)</MenuItem>
                   <MenuItem value="경과 확인 중">치료를 마치고 경과를 지켜보고 있음(정기검사)</MenuItem>
-                  
                 </Select>
               </FormControl>
             </Grid>
@@ -190,13 +228,13 @@ const SurveyForm = () => {
             placeholder="암 치료로 인한 신체적 제한 사항이 있다면 적어주세요(몸이 많이 피로해요.), 없으면 없음으로 작성해주세요."
             minRows={3}
             fullWidth
-          sx={{
-            mt: 2,
-            '& .MuiInputBase-input::placeholder': {
-              fontSize: '0.85rem', // 원하는 크기로 조정
-              color: '#9e9e9e',
-            },
-          }}
+            sx={{
+              mt: 2,
+              '& .MuiInputBase-input::placeholder': {
+                fontSize: '0.85rem', // 원하는 크기로 조정
+                color: '#9e9e9e',
+              },
+            }}
             value={physicalLimitations}
             onChange={(e) => setPhysicalLimitations(e.target.value)}
           />

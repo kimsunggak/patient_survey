@@ -1,47 +1,101 @@
 // src/pages/SurveyResultPage.jsx
 import React from 'react';
 import { Box, Typography, Button } from '@mui/material';
+import { useLocation } from 'react-router-dom';
 import SurveyResult from '../component/SurveyResult';
+import * as SurveyUtils from '../utils/SurveyUtils';
+
+const labelMap = {
+  physicalChange: '암 이후 내 몸의 변화',
+  healthManagement: '건강한 삶을 위한 관리',
+  support: '회복을 도와주는 사람들',
+  psychologicalBurden: '심리적 부담',
+  socialBurden: '사회적 삶의 부담',
+  resilience: '암 이후 탄력성'
+};
+
+const sectionIds = {
+  physicalChange: ['q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7', 'q8'],
+  healthManagement: ['q9', 'q10', 'q11', 'q12', 'q13'],
+  support: ['q14', 'q15', 'q16', 'q17'],
+  psychologicalBurden: ['q18', 'q19', 'q20', 'q21', 'q22', 'q23', 'q24', 'q25'],
+  socialBurden: ['q26', 'q27', 'q28'],
+  resilience: ['q29', 'q30', 'q31']
+};
 
 const SurveyResultPage = () => {
-  // 실제로는 API에서 받아오시겠지만 예시 더미 데이터
-  const dummyScores = {
-    physicalChange: 19,
-    healthManagement: 15,
-    support: 11,
-    psychologicalBurden: 20,
-    socialBurden: 8,
-    resilience: 11,
-    lifestyle: 5
-  };
+  const location = useLocation();
+  const answers = location.state?.answers || {};
 
-  const dummyRecs = {
-    warning: '건강한 삶을 위한 관리 점수가 낮습니다. 이 부분에 대한 개선이 도움이 될 수 있습니다.',
-    info: '균형 잡힌 식단과 규칙적인 운동을 통해 건강 관리를 개선해보세요. 암 생존자를 위한 영양 프로그램에 참여하는 것도 좋은 방법입니다.'
-  };
+  // 1. 역코딩 적용
+  const reversed = SurveyUtils.applyReverseScore(answers);
 
+  // 2. 영역별 합계(원점수)
+  const rawScores = {};
+  Object.entries(sectionIds).forEach(([key, ids]) => {
+    rawScores[key] = ids.reduce((sum, id) => sum + (Number(reversed[id]) || 0), 0);
+  });
+
+  // 3. **합계 → 평균** 산출
+  const meanScores = {};
+  Object.entries(sectionIds).forEach(([key, ids]) => {
+    meanScores[key] = rawScores[key] / ids.length;
+  });
+
+  /* ★ 섹션별 원점수 평균으로 집단 분류 */
+  const riskByMean = {};
+  Object.entries(meanScores).forEach(([key, mean]) => {
+    riskByMean[key] = SurveyUtils.getRiskGroup(labelMap[key], mean);
+  });
+
+  // 4. z-score(T-score) 변환
+  const stdScores = {};
+  Object.entries(meanScores).forEach(([key, mean]) => {
+    const sectionName = labelMap[key];
+    stdScores[key] = SurveyUtils.newScore(sectionName, mean);
+  });
+
+  // 5. 집단 분류 (평균점수 기반!)
+  const riskGroups = {};
+  Object.entries(meanScores).forEach(([key, mean]) => {
+    const sectionName = labelMap[key];
+    riskGroups[key] = SurveyUtils.getRiskGroup(sectionName, mean);
+  });
+
+  // 6. 전체 평균 **Mean-점수** → 집단 분류 → 템플릿 문구
+  const overallMean =
+    Object.values(meanScores).reduce((a, b) => a + b, 0) /
+    Object.values(meanScores).length;
+  const overallRiskGroup =
+    SurveyUtils.getRiskGroup('전체 평균 (암 생존자 건강관리)', overallMean);
+  const overallFeedback =
+    SurveyUtils.getPatientComment(overallRiskGroup);
+
+  console.log('overallRiskGroup:', overallRiskGroup);
+  console.log('overallFeedback:', overallFeedback);
+
+  // 7. SurveyResult에 전달
   return (
     <Box p={4}>
-    
-
-      <SurveyResult scores={dummyScores} recommendations={dummyRecs} />
-
+      <SurveyResult
+        rawScores={rawScores}
+        meanScores={meanScores}
+        stdScores={stdScores}
+        riskGroups={riskGroups}
+        overallFeedback={overallFeedback}
+        overallRiskGroup={overallRiskGroup}
+        answers={answers}
+        riskByMean={riskByMean}          // 새로 전달
+      />
       <Box mt={4} display="flex" justifyContent="center">
-  <Button
-    variant="contained"
-    href="/"
-    sx={{
-      px: 6,            // 좌우 패딩 (버튼 너비 확장)
-      py: 2,            // 상하 패딩 (버튼 높이 확장)
-      fontSize: '1.1rem', // 글자 크기 키움
-      fontWeight: 'bold', // 글자 굵게
-      borderRadius: 1     // 각진 모서리
-    }}
-  >
-    홈으로 가기
-  </Button>
-</Box>
-
+        <Button
+          variant="contained"
+          href="/"
+          sx={{ px: 6, py: 2, fontSize: '1.1rem', fontWeight: 'bold', borderRadius: 1 }}
+        >
+          홈으로 가기
+        </Button>
+      </Box>
     </Box>
   );
 };

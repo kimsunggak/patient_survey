@@ -1,6 +1,6 @@
 // src/pages/Section5Page.js
-import React, { useState,useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Container,
   Typography,
@@ -24,23 +24,31 @@ const steps = [
 
 const Section5Page = () => {
   const navigate = useNavigate();
-  const [answers, setAnswers] = useState({});
+  const location = useLocation();
+  const userName = location.state?.userName; // Retrieve userName
+  const [answers, setAnswers] = useState(location.state?.answers || {}); // Retrieve and initialize answers
   const [error, setError] = useState(false);
 
   const total = 3;  // Q26~Q28
-  const done = ['q26','q27','q28'].filter((id) => answers[id]).length;
+  const done = ['q26', 'q27', 'q28'].filter((id) => answers[id]).length;
   const progress = (done / total) * 100;
   const currentStep = 4;
 
   const handleNext = () => {
     if (done < total) return setError(true);
-    navigate('/section6');
+    navigate('/section6', { state: { userName, answers } }); // Pass userName and answers
   };
+
+  const handlePrev = () => {
+    navigate('/section4', { state: { userName, answers } }); // Pass userName and answers
+  };
+
   useEffect(() => {
     if (done === total) setError(false);
   }, [done]);
+
   return (
-    <Container maxWidth="md" sx={{ py: 4,background: 'none',
+    <Container maxWidth="md" sx={{ py: 4, background: 'none',
       bgcolor: 'background.default' }}>
       <Typography variant="h4" align="center" gutterBottom sx={{ fontWeight: 'bold' }}>
         암 생존자 건강관리 설문
@@ -77,7 +85,7 @@ const Section5Page = () => {
       </Box>
 
       <Paper elevation={3} sx={{ p: 4 }}>
-        <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2,textAlign:"center" }}>
+        <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, textAlign: "center" }}>
           {steps[currentStep]}
         </Typography>
 
@@ -91,14 +99,14 @@ const Section5Page = () => {
         <Section5Component answers={answers} setAnswers={setAnswers} />
 
         {error && (
-            <Alert severity="warning" sx={{ mt: 2 }}>
-              <AlertTitle>경고</AlertTitle>
-                모든 문항을 응답해야 다음으로 넘어갈 수 있습니다.
-            </Alert>
+          <Alert severity="warning" sx={{ mt: 2 }}>
+            <AlertTitle>경고</AlertTitle>
+            모든 문항을 응답해야 다음으로 넘어갈 수 있습니다.
+          </Alert>
         )}
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-          <Button variant="outlined" onClick={() => navigate('/section4')}>
+          <Button variant="outlined" onClick={handlePrev}>
             이전
           </Button>
           <Button variant="contained" onClick={handleNext}>

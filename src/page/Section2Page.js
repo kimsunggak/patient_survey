@@ -1,6 +1,6 @@
 // src/pages/Section2Page.js
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Container,
   Typography,
@@ -24,20 +24,30 @@ const steps = [
 
 const Section2Page = () => {
   const navigate = useNavigate();
-  const [answers, setAnswers] = useState({
+  const location = useLocation();
+  const userName = location.state?.userName; // Retrieve userName
+  // answers 초기값 보정: q12_reasons 항상 배열로
+  const defaultAnswers = {
     q9: '',
     q10: '',
     q11: '',
     q12: '',       // main 선택지
     q12_reasons: [], // 12-1 하위 체크박스
     q13: '',       // main 선택지
-    // q13_1_* 하위 체크박스 항목들
     q13_1_1: false,
     q13_1_2: false,
     q13_1_3: false,
     q13_1_4: false,
     q13_1_5: false,
     q13_1_6: false
+  };
+  const [answers, setAnswers] = useState(() => {
+    const incoming = location.state?.answers || {};
+    return {
+      ...defaultAnswers,
+      ...incoming,
+      q12_reasons: Array.isArray(incoming.q12_reasons) ? incoming.q12_reasons : [],
+    };
   });
   const [error, setError] = useState(false);
 
@@ -67,7 +77,11 @@ const Section2Page = () => {
       setError(true);
       return;
     }
-    navigate('/section3');
+    navigate('/section3', { state: { userName, answers } }); // Pass userName and answers
+  };
+
+  const handlePrev = () => {
+    navigate('/section1', { state: { userName, answers } }); // Pass userName and answers
   };
 
   useEffect(() => {
@@ -134,7 +148,7 @@ const Section2Page = () => {
         )}
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-          <Button variant="outlined" onClick={() => navigate('/section1')}>이전</Button>
+          <Button variant="outlined" onClick={handlePrev}>이전</Button>
           <Button variant="contained" onClick={handleNext}>다음</Button>
         </Box>
       </Paper>

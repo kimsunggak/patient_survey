@@ -1,6 +1,6 @@
 // src/pages/Section3Page.js
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
   Container,
   Typography,
@@ -25,7 +25,9 @@ const steps = [
 
 const Section3Page = () => {
   const navigate = useNavigate();
-  const [answers, setAnswers] = useState({ q15_reasons: [] });
+  const location = useLocation();
+  const userName = location.state?.userName; // Retrieve userName
+  const [answers, setAnswers] = useState(location.state?.answers || { q15_reasons: [] }); // Retrieve and initialize answers
   const [error, setError] = useState(false);
 
   // 진행 표시: q14~q17만 카운트, total 4
@@ -47,7 +49,11 @@ const Section3Page = () => {
       setError(true);
       return;
     }
-    navigate('/section4');
+    navigate('/section4', { state: { userName, answers } }); // Pass userName and answers
+  };
+
+  const handlePrev = () => {
+    navigate('/section2', { state: { userName, answers } }); // Pass userName and answers
   };
 
   useEffect(() => {
@@ -142,7 +148,7 @@ const Section3Page = () => {
         )}
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-          <Button variant="outlined" onClick={() => navigate('/section2')}>
+          <Button variant="outlined" onClick={handlePrev}>
             이전
           </Button>
           <Button variant="contained" onClick={handleNext}>
