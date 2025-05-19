@@ -183,7 +183,7 @@ const InfoValue = styled.p`
 
 // 차트 컨테이너
 const ChartContainer = styled.div`
-  height: 350px;
+  height: 300px;
   margin-bottom: 2rem;
 `;
 
