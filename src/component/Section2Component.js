@@ -138,10 +138,13 @@ const Section2Component = ({ name, answers, setAnswers, setValidationError }) =>
               <FormControlLabel
                 key={idx}
                 control={
-                  <Checkbox
+                  <Radio
                     checked={answers.q12_reasons?.includes(reason) || false}
                     onChange={handleReasons}
                     name="q12_reasons"
+                    value={reason}
+                    icon={<RadioButtonUncheckedIcon />}
+                    checkedIcon={<RadioButtonCheckedIcon />}
                   />
                 }
                 label={reason}
