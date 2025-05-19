@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Box,
   FormControl,
@@ -12,10 +12,20 @@ import {
 } from '@mui/material';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
+import { useNavigate } from 'react-router-dom';
+import { saveUserAnswers } from '../utils/firebaseUtils';
 
-const Section2Component = ({ answers, setAnswers, setValidationError }) => {
+const Section2Component = ({ name, answers, setAnswers, setValidationError }) => {
+  const navigate = useNavigate();
+
+  // Firestore에 저장
+  useEffect(() => {
+    if (!name) return;
+    saveUserAnswers(name, answers).catch(console.error);
+  }, [answers, name]);
+
   const questions = [
-    { id: 'q9', label: '9. 여러 가지 식품군을 골고루 섭취한다 (예: 균형식).' },
+    { id: 'q9',  label: '9. 여러 가지 식품군을 골고루 섭취한다 (예: 균형식).' },
     { id: 'q10', label: '10. 암 진단 및 치료 이후, 규칙적인 운동을 하고 있다.' },
     { id: 'q11', label: '11. 규칙적인 식사를 한다.' },
     { id: 'q12', label: '12. 나는 내가 생각한 건강관리 방법을 잘 실천하고 있다.' },
@@ -50,8 +60,26 @@ const Section2Component = ({ answers, setAnswers, setValidationError }) => {
   ];
 
   const handleRadio = (e) => {
-    const { name, value } = e.target;
-    setAnswers((prev) => ({ ...prev, [name]: value }));
+    const { name: qId, value } = e.target;
+
+    // q12 문항에서 3, 4, 5를 선택하면 섹션5로 바로 이동
+    if (qId === 'q12' && ['3', '4', '5'].includes(value)) {
+      const updated = { ...answers, [qId]: value };
+      setAnswers(updated);
+      localStorage.setItem('surveyAnswers', JSON.stringify(updated));
+      navigate('/section5', { state: { name, fromSkip: true } });
+      return;
+    }
+
+    // 그 외 문항 처리
+    setAnswers((prev) => {
+      const updated = { ...prev, [qId]: value };
+      if (qId === 'q12' && !['1', '2'].includes(value)) {
+        delete updated.q12_reasons;
+      }
+      return updated;
+    });
+    setValidationError(false);
   };
 
   const handleReasons = (e) => {
@@ -60,31 +88,19 @@ const Section2Component = ({ answers, setAnswers, setValidationError }) => {
     const next = prev.includes(value)
       ? prev.filter((v) => v !== value)
       : [...prev, value];
-    setAnswers((prevState) => ({ ...prevState, q12_reasons: next }));
+    setAnswers((prevAns) => ({ ...prevAns, q12_reasons: next }));
   };
 
-  // 🔍 유효성 검사 함수 (UI에서는 이 함수 결과를 활용)
   const validateSection2 = () => {
-    const requiredQuestions = ['q9', 'q10', 'q11', 'q12', 'q13'];
-    const missing = requiredQuestions.filter((q) => !answers[q]);
-
+    const required = ['q9', 'q10', 'q11', 'q12'];
+    const missing = required.filter((id) => !answers[id]);
     if (answers.q12 === '1' || answers.q12 === '2') {
       if (!answers.q12_reasons || answers.q12_reasons.length === 0) {
         missing.push('q12_reasons');
       }
     }
-
-    if (answers.q13 === '4' || answers.q13 === '5') {
-      sub13.forEach((q) => {
-        if (!answers[q.id]) {
-          missing.push(q.id);
-        }
-      });
-    }
-
-    const isValid = missing.length === 0;
-    setValidationError(!isValid);
-    return isValid;
+    setValidationError(missing.length > 0);
+    return missing.length === 0;
   };
 
   return (
@@ -111,26 +127,24 @@ const Section2Component = ({ answers, setAnswers, setValidationError }) => {
         </FormControl>
       ))}
 
-      {/* Q12-1 */}
+      {/* Q12-1: q12가 1 또는 2일 때만 표시 */}
       {['1', '2'].includes(answers.q12) && (
-        <Box sx={{ mb: 3 }}>
-          <FormLabel component="legend" sx={{ fontWeight: 'bold', display: 'block', mb: 1, color: 'text.primary' }}>
-            ※ 12-1. 건강관리를 잘 하지 못한다면, 다음 중 무엇 때문입니까? (해당되는 것 모두 체크해 주세요)
-          </FormLabel>
+        <Box sx={{ mb: 2 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 'bold', display: 'block', mb: 1 }}>
+            ※ 12-1. 해당되지 않는 이유를 모두 선택하세요.
+          </Typography>
           <FormGroup>
-            {reasons12_1.map((r, idx) => (
+            {reasons12_1.map((reason, idx) => (
               <FormControlLabel
                 key={idx}
                 control={
                   <Checkbox
-                    icon={<RadioButtonUncheckedIcon />}
-                    checkedIcon={<RadioButtonCheckedIcon />}
-                    checked={(answers.q12_reasons || []).includes(r)}
+                    checked={answers.q12_reasons?.includes(reason) || false}
                     onChange={handleReasons}
-                    value={r}
+                    name="q12_reasons"
                   />
                 }
-                label={r}
+                label={reason}
               />
             ))}
           </FormGroup>
@@ -138,13 +152,13 @@ const Section2Component = ({ answers, setAnswers, setValidationError }) => {
       )}
 
       {/* Q13 */}
-      <FormControl component="fieldset" key="q13" sx={{ mb: 2 }} fullWidth>
+      <FormControl component="fieldset" sx={{ mb: 2 }} fullWidth>
         <FormLabel component="legend" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
-          13. 암 진단 및 치료 이후, 식이조절을 한다.
+          {questions[4].label}
         </FormLabel>
         <RadioGroup
           name="q13"
-          value={answers['q13'] || ''}
+          value={answers.q13 || ''}
           onChange={handleRadio}
         >
           {options.map((opt) => (
@@ -158,21 +172,23 @@ const Section2Component = ({ answers, setAnswers, setValidationError }) => {
         </RadioGroup>
       </FormControl>
 
-      {/* Q13-1 */}
+      {/* Q13-1: q13가 4 또는 5일 때만 표시 */}
       {['4', '5'].includes(answers.q13) && (
         <Box sx={{ mb: 2 }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 'bold', display: 'block', mb: 1 }}>
             ※ 13-1. 아래 각각의 사항에 대해서 식이조절을 얼마나 잘 하는지 체크해 주세요.
           </Typography>
-          {sub13.map((q) => (
-            <FormControl component="fieldset" key={q.id} sx={{ mb: 2 }} fullWidth>
+          {sub13.map((item) => (
+            <FormControl component="fieldset" key={item.id} sx={{ mb: 2 }} fullWidth>
               <FormLabel component="legend">
-                <Typography component="span" sx={{ fontWeight: 'bold', mr: 1 }}>{q.num}</Typography>
-                <Typography component="span">{q.text}</Typography>
+                <Typography component="span" sx={{ fontWeight: 'bold', mr: 1 }}>
+                  {item.num}
+                </Typography>
+                <Typography component="span">{item.text}</Typography>
               </FormLabel>
               <RadioGroup
-                name={q.id}
-                value={answers[q.id] || ''}
+                name={item.id}
+                value={answers[item.id] || ''}
                 onChange={handleRadio}
               >
                 {options.map((opt) => (

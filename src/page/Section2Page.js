@@ -1,13 +1,14 @@
 // src/pages/Section2Page.js
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Container,
   Typography,
   Box,
   Paper,
   Button,
-  Alert, AlertTitle,
+  Alert,
+  AlertTitle,
   LinearProgress
 } from '@mui/material';
 import Section2Component from '../component/Section2Component';
@@ -24,38 +25,29 @@ const steps = [
 
 const Section2Page = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const userName = location.state?.userName; // Retrieve userName
-  // answers 초기값 보정: q12_reasons 항상 배열로
-  const defaultAnswers = {
+  const { state } = useLocation();
+  // SurveyForm 또는 로컬스토리지에서 사용자 이름 가져오기
+  const userName = state?.name || localStorage.getItem('userName') || '';
+
+  const [answers, setAnswers] = useState({
     q9: '',
     q10: '',
     q11: '',
-    q12: '',       // main 선택지
-    q12_reasons: [], // 12-1 하위 체크박스
-    q13: '',       // main 선택지
+    q12: '',
+    q12_reasons: [],
+    q13: '',
     q13_1_1: false,
     q13_1_2: false,
     q13_1_3: false,
     q13_1_4: false,
     q13_1_5: false,
     q13_1_6: false
-  };
-  const [answers, setAnswers] = useState(() => {
-    const incoming = location.state?.answers || {};
-    return {
-      ...defaultAnswers,
-      ...incoming,
-      q12_reasons: Array.isArray(incoming.q12_reasons) ? incoming.q12_reasons : [],
-    };
   });
   const [error, setError] = useState(false);
 
-  // Q12 및 Q13 하위 필수 여부 플래그
   const requiredSub12 = ['1', '2'].includes(answers.q12);
   const requiredSub13 = ['4', '5'].includes(answers.q13);
 
-  // 에러 체크용 동적 완료 개수
   const mainDone = ['q9','q10','q11'].filter(id => answers[id]).length;
   const sub12Done = requiredSub12 && answers.q12_reasons.length > 0 ? 1 : 0;
   const sub13Ids = ['q13_1_1','q13_1_2','q13_1_3','q13_1_4','q13_1_5','q13_1_6'];
@@ -63,13 +55,8 @@ const Section2Page = () => {
   const doneCount = mainDone + sub12Done + sub13Done;
   const totalCount = 3 + (requiredSub12 ? 1 : 0) + (requiredSub13 ? sub13Ids.length : 0);
 
-  // 메인 문항 진행상황 (5개 고정: Q9~Q13)
-  const mainProgressCount =
-    ['q9','q10','q11'].filter(id => answers[id]).length +
-    (answers.q12 ? 1 : 0) +
-    (answers.q13 ? 1 : 0);
+  const mainProgressCount = mainDone + (answers.q12 ? 1 : 0) + (answers.q13 ? 1 : 0);
   const progressPercentage = (mainProgressCount / 5) * 100;
-
   const currentStep = 1;
 
   const handleNext = () => {
@@ -77,17 +64,11 @@ const Section2Page = () => {
       setError(true);
       return;
     }
-    navigate('/section3', { state: { userName, answers } }); // Pass userName and answers
-  };
-
-  const handlePrev = () => {
-    navigate('/section1', { state: { userName, answers } }); // Pass userName and answers
+    navigate('/section3', { state: { name: userName } });
   };
 
   useEffect(() => {
-    if (doneCount === totalCount) {
-      setError(false);
-    }
+    if (doneCount === totalCount) setError(false);
   }, [doneCount, totalCount]);
 
   return (
@@ -127,7 +108,7 @@ const Section2Page = () => {
       </Box>
 
       <Paper elevation={3} sx={{ p: 4 }}>
-        <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, textAlign: "center" }}>
+        <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, textAlign: 'center' }}>
           {steps[currentStep]}
         </Typography>
 
@@ -138,7 +119,12 @@ const Section2Page = () => {
           </Typography>
         </Box>
 
-        <Section2Component answers={answers} setAnswers={setAnswers} />
+        <Section2Component
+          name={userName}
+          answers={answers}
+          setAnswers={setAnswers}
+          setValidationError={setError}
+        />
 
         {error && (
           <Alert severity="warning" sx={{ mt: 2 }}>
@@ -148,7 +134,7 @@ const Section2Page = () => {
         )}
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-          <Button variant="outlined" onClick={handlePrev}>이전</Button>
+          <Button variant="outlined" onClick={() => navigate('/section1')}>이전</Button>
           <Button variant="contained" onClick={handleNext}>다음</Button>
         </Box>
       </Paper>

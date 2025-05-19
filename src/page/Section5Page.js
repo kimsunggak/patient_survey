@@ -24,9 +24,11 @@ const steps = [
 
 const Section5Page = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const userName = location.state?.userName; // Retrieve userName
-  const [answers, setAnswers] = useState(location.state?.answers || {}); // Retrieve and initialize answers
+  const { state } = useLocation();
+  const userName = state?.name || localStorage.getItem('userName') || '';
+  const fromSkip = state?.fromSkip || false;
+
+  const [answers, setAnswers] = useState({});
   const [error, setError] = useState(false);
 
   const total = 3;  // Q26~Q28
@@ -35,28 +37,25 @@ const Section5Page = () => {
   const currentStep = 4;
 
   const handleNext = () => {
-    if (done < total) return setError(true);
-    navigate('/section6', { state: { userName, answers } }); // Pass userName and answers
-  };
-
-  const handlePrev = () => {
-    navigate('/section4', { state: { userName, answers } }); // Pass userName and answers
+    if (done < total) {
+      setError(true);
+      return;
+    }
+    navigate('/section6', { state: { name: userName } });
   };
 
   useEffect(() => {
     if (done === total) setError(false);
-  }, [done]);
+  }, [done, total]);
 
   return (
-    <Container maxWidth="md" sx={{ py: 4, background: 'none',
-      bgcolor: 'background.default' }}>
-      <Typography variant="h4" align="center" gutterBottom sx={{ fontWeight: 'bold' }}>
-        암 생존자 건강관리 설문
-      </Typography>
-      <Typography variant="subtitle1" align="center" color="textSecondary" gutterBottom>
-        여러분의 건강 상태와 일상생활에 대한 것입니다. 아래 내용을 체크해 주세요.
-      </Typography>
-
+    <Container maxWidth="md" sx={{ py: 4, background: 'none', bgcolor: 'background.default' }}>
+          <Typography variant="h4" align="center" gutterBottom sx={{ fontWeight: 'bold' }}>
+            암 생존자 건강관리 설문
+          </Typography>
+          <Typography variant="subtitle1" align="center" color="textSecondary" gutterBottom>
+            여러분의 건강 상태와 일상생활에 대한 것입니다. 아래 내용을 체크해 주세요.
+          </Typography>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
         {steps.map((label, idx) => {
           const bg = idx < currentStep
@@ -69,9 +68,15 @@ const Section5Page = () => {
             <Box key={label} sx={{ flex: 1, textAlign: 'center' }}>
               <Box
                 sx={{
-                  width: 32, height: 32, mx: 'auto',
-                  borderRadius: '50%', bgcolor: bg, color: '#fff',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center'
+                  width: 32,
+                  height: 32,
+                  mx: 'auto',
+                  borderRadius: '50%',
+                  bgcolor: bg,
+                  color: '#fff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
                 }}
               >
                 {idx + 1}
@@ -84,19 +89,20 @@ const Section5Page = () => {
         })}
       </Box>
 
-      <Paper elevation={3} sx={{ p: 4 }}>
-        <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, textAlign: "center" }}>
-          {steps[currentStep]}
-        </Typography>
-
-        <Box sx={{ mb: 3 }}>
+      <Paper sx={{ p: 4 }}>
+        <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, textAlign: 'center' }}>
+                  {steps[currentStep]}
+                </Typography>
+        <Box sx={{ mb: 2 }}>
           <LinearProgress variant="determinate" value={progress} />
-          <Typography variant="body2" align="right" sx={{ mt: 1, color: 'text.secondary' }}>
-            진행 상황: {done}/{total}
-          </Typography>
+          <Typography align="right" variant="body2">{done}/{total}</Typography>
         </Box>
 
-        <Section5Component answers={answers} setAnswers={setAnswers} />
+        <Section5Component
+          name={userName}
+          answers={answers}
+          setAnswers={setAnswers}
+        />
 
         {error && (
           <Alert severity="warning" sx={{ mt: 2 }}>
@@ -106,7 +112,15 @@ const Section5Page = () => {
         )}
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-          <Button variant="outlined" onClick={handlePrev}>
+          <Button
+            variant="outlined"
+            onClick={() =>
+              navigate(
+                fromSkip ? '/section2' : '/section4',
+                { state: { name: userName } }
+              )
+            }
+          >
             이전
           </Button>
           <Button variant="contained" onClick={handleNext}>
