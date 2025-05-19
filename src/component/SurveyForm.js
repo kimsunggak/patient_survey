@@ -2,24 +2,40 @@
 import React, { useState } from 'react';
 import {
   Container, Typography, TextField, MenuItem, FormControl, InputLabel,
-  Select, Button, Grid, Checkbox, FormGroup, FormControlLabel, Box, Paper, Divider
+  Select, Button, Grid, Checkbox, FormGroup, FormControlLabel, Box, Paper, Divider,
+  Radio, RadioGroup, FormHelperText
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { saveUserData } from '../utils/firebaseUtils'; // 추가
+import { saveUserData } from '../utils/firebaseUtils';
 
 const SurveyForm = () => {
   const navigate = useNavigate();
+  
+  const [birthDate, setBirthDate] = useState('');
   const [name, setName] = useState(''); // 이름 상태 추가
-  const [birthDate, setBirthDate] = useState(''); // 생년월일 상태 추가
   const [gender, setGender] = useState('');
+  const [maritalStatus, setMaritalStatus] = useState('');
   const [diagnosisDate, setDiagnosisDate] = useState('');
   const [cancerType, setCancerType] = useState('');
   const [otherCancerType, setOtherCancerType] = useState('');
+  const [cancerStage, setCancerStage] = useState('');
+  const [otherCancerDiagnosis, setOtherCancerDiagnosis] = useState('');
+  const [otherCancerDetails, setOtherCancerDetails] = useState('');
+  const [hasSurgery, setHasSurgery] = useState('');
+  const [surgeryDate, setSurgeryDate] = useState('');
   const [treatmentTypes, setTreatmentTypes] = useState([]);
-  const [otherTreatmentType, setOtherTreatmentType] = useState('');
-  const [currentTreatment, setCurrentTreatment] = useState('');
+  const [hasRecurrence, setHasRecurrence] = useState('');
   const [mentalHealthHistory, setMentalHealthHistory] = useState('');
-  const [physicalLimitations, setPhysicalLimitations] = useState('');
+  const [mentalHealthDiagnoses, setMentalHealthDiagnoses] = useState({
+    depression: false,
+    anxietyDisorder: false,
+    schizophrenia: false,
+    other: false
+  });
+  const [otherMentalDiagnosis, setOtherMentalDiagnosis] = useState('');
+  const [mentalHealthImpact, setMentalHealthImpact] = useState('');
+  const [otherTreatmentType, setOtherTreatmentType] = useState('');
+  const [errors, setErrors] = useState({});
 
   const handleTreatmentChange = (event) => {
     const { value } = event.target;
@@ -28,33 +44,97 @@ const SurveyForm = () => {
     );
   };
 
-  const handleSubmit = async (e) => { // async 추가
+  const handleMentalHealthDiagnosisChange = (diagnosis) => (event) => {
+    setMentalHealthDiagnoses(prev => ({
+      ...prev,
+      [diagnosis]: event.target.checked
+    }));
+  };
+
+  const validate = () => {
+    const newErrors = {};
+
+    // 개인정보 검증
+    if (!name) newErrors.name = '이름을 입력해주세요.';
+    if (!birthDate) newErrors.birthDate = '생년월일을 입력해주세요.';
+    if (!gender) newErrors.gender = '성별을 선택해주세요.';
+    if (!maritalStatus) newErrors.maritalStatus = '결혼 상태를 선택해주세요.';
+
+    // 진단 정보 검증
+    if (!diagnosisDate) newErrors.diagnosisDate = '진단 시기를 입력해주세요.';
+    if (!cancerType) newErrors.cancerType = '암 종류를 선택해주세요.';
+    if (cancerType === '기타' && !otherCancerType) newErrors.otherCancerType = '기타 암 종류를 입력해주세요.';
+    if (!cancerStage) newErrors.cancerStage = '암의 진행단계를 선택해주세요.';
+    if (!otherCancerDiagnosis) newErrors.otherCancerDiagnosis = '초기 진단 받았던 암 이외에 다른 유형의 암 진단을 받으신 적이 있는지 선택해주세요.';
+    if (otherCancerDiagnosis === '예' && !otherCancerDetails) newErrors.otherCancerDetails = '만약 진단 받은 적이 있다면, 어떤 암입니까?를 입력해주세요.';
+
+    // 치료 정보 검증
+    if (!hasSurgery) newErrors.hasSurgery = '암 치료를 위한 수술을 받은 경험이 있는지 선택해주세요.';
+    if (hasSurgery === '예' && !surgeryDate) newErrors.surgeryDate = '만약 수술 경험이 있다면, 그 날짜를 입력해주세요.';
+    if (treatmentTypes.length === 0) newErrors.treatmentTypes = '받은 치료 유형을 선택해주세요.';
+    if (treatmentTypes.includes('기타') && !otherTreatmentType) newErrors.otherTreatmentType = '기타 치료명을 입력해주세요.';
+    if (!hasRecurrence) newErrors.hasRecurrence = '암이 재발되거나 전이된 적이 있는지 선택해주세요.';
+
+    // 정신 건강 정보 검증
+    if (!mentalHealthHistory) newErrors.mentalHealthHistory = '정신과적 진단을 받은 경험이 있는지 선택해주세요.';
+    if (mentalHealthHistory === '예') {
+      if (Object.values(mentalHealthDiagnoses).every(value => !value)) {
+        newErrors.mentalHealthDiagnoses = '받은 정신과적 진단을 선택해주세요.';
+      }
+      if (mentalHealthDiagnoses.other && !otherMentalDiagnosis) {
+        newErrors.otherMentalDiagnosis = '기타 정신질환명을 입력해주세요.';
+      }
+      if (!mentalHealthImpact) {
+        newErrors.mentalHealthImpact = '위와 같은 정신과적 증상이 귀하의 일상생활에 얼마나 방해가 되었는지를 선택해주세요.';
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // 기본 정보 저장 (이름 필드가 채워졌는지 간단히 확인)
-    if (!name.trim()) {
-      alert("이름을 입력해주세요.");
+    
+    if (!validate()) {
       return;
     }
-    const userInfo = {
+
+    // 사용자 데이터 객체 생성
+    const userData = {
       name,
-      birthDate, // 생년월일 추가
+      birthDate,
       gender,
+      maritalStatus,
       diagnosisDate,
-      cancerType: cancerType === '기타' ? otherCancerType : cancerType,
-      treatmentTypes: treatmentTypes.includes('기타') ? [...treatmentTypes.filter(t => t !== '기타'), otherTreatmentType] : treatmentTypes,
-      currentTreatment,
+      cancerType,
+      otherCancerType,
+      cancerStage,
+      otherCancerDiagnosis,
+      otherCancerDetails,
+      hasSurgery,
+      surgeryDate,
+      treatmentTypes,
+      hasRecurrence,
       mentalHealthHistory,
-      physicalLimitations,
-      // 다른 개인 정보 필드들도 여기에 포함
+      mentalHealthDiagnoses,
+      otherMentalDiagnosis,
+      mentalHealthImpact,
+      otherTreatmentType,
+      info: {
+        name,
+        gender,
+        diagnosisDate,
+        cancerType,
+      },
+      answers: {}
     };
-    try {
-      await saveUserData(userInfo); // 사용자 기본 정보 저장
-      console.log("사용자 기본 정보 저장 완료:", name);
-      navigate('/section1', { state: { userName: name, answers: {} } }); // userName과 초기 answers 전달
-    } catch (error) {
-      console.error("사용자 기본 정보 저장 실패:", error);
-      alert("기본 정보 저장에 실패했습니다. 다시 시도해주세요.");
-    }
+
+    // Firebase에 데이터 저장
+    await saveUserData(userData);
+    
+    // 다음 섹션으로 이동
+    navigate('/section1', { state: { userName: userData.name } });
   };
 
   return (
@@ -74,35 +154,48 @@ const SurveyForm = () => {
           <Divider sx={{ mb: 2 }} />
 
           <Grid container spacing={2} direction="column">
-            <Grid item xs={12} >
+            <Grid item xs={12}>
               <TextField
                 label="이름"
                 placeholder="이름을 입력하세요"
                 fullWidth
-                value={name} // value 바인딩
-                onChange={(e) => setName(e.target.value)} // onChange 핸들러
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                error={!!errors.name}
+                helperText={errors.name}
               />
             </Grid>
-            <Grid item xs={12} >
+            <Grid item xs={12}>
               <TextField
-                fullWidth
                 label="생년월일"
                 type="date"
+                fullWidth
                 InputLabelProps={{ shrink: true }}
-                value={birthDate} // value 바인딩
-                onChange={(e) => setBirthDate(e.target.value)} // onChange 핸들러
+                value={birthDate}
+                onChange={(e) => setBirthDate(e.target.value)}
+                error={!!errors.birthDate}
+                helperText={errors.birthDate}
               />
             </Grid>
-            <Grid item xs={12} >
-              <TextField label="나이" placeholder="나이를 입력하세요" fullWidth type="number" />
-            </Grid>
-            <Grid item xs={12} >
-              <FormControl fullWidth >
-                <InputLabel>성별</InputLabel>
+            <Grid item xs={12}>
+              <FormControl fullWidth error={!!errors.gender}>
+                <InputLabel>성별을 선택하세요</InputLabel>
                 <Select value={gender} onChange={(e) => setGender(e.target.value)} label="성별">
                   <MenuItem value="남성">남성</MenuItem>
                   <MenuItem value="여성">여성</MenuItem>
                 </Select>
+                <FormHelperText>{errors.gender}</FormHelperText>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <FormControl fullWidth error={!!errors.maritalStatus}>
+                <InputLabel>결혼 상태를 선택하세요</InputLabel>
+                <Select value={maritalStatus} onChange={(e) => setMaritalStatus(e.target.value)} label="결혼 상태">
+                  <MenuItem value="미혼">미혼</MenuItem>
+                  <MenuItem value="결혼">결혼</MenuItem>
+                  <MenuItem value="기타">기타</MenuItem>
+                </Select>
+                <FormHelperText>{errors.maritalStatus}</FormHelperText>
               </FormControl>
             </Grid>
           </Grid>
@@ -112,7 +205,7 @@ const SurveyForm = () => {
           <Divider sx={{ mb: 2 }} />
 
           <Grid container spacing={2} direction="column">
-            <Grid item xs={12} >
+            <Grid item xs={12}>
               <TextField
                 label="진단 시기"
                 type="date"
@@ -120,17 +213,20 @@ const SurveyForm = () => {
                 value={diagnosisDate}
                 onChange={(e) => setDiagnosisDate(e.target.value)}
                 InputLabelProps={{ shrink: true }}
+                error={!!errors.diagnosisDate}
+                helperText={errors.diagnosisDate}
               />
             </Grid>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth>
-                <InputLabel>암 종류</InputLabel>
+            <Grid item xs={12}>
+              <FormControl fullWidth error={!!errors.cancerType}>
+                <InputLabel>어떤 암으로 진단받았는지 선택하세요</InputLabel>
                 <Select value={cancerType} onChange={(e) => setCancerType(e.target.value)} label="암 종류">
                   <MenuItem value="유방암">유방암</MenuItem>
                   <MenuItem value="폐암">폐암</MenuItem>
                   <MenuItem value="대장암">대장암</MenuItem>
                   <MenuItem value="기타">기타</MenuItem>
                 </Select>
+                <FormHelperText>{errors.cancerType}</FormHelperText>
               </FormControl>
             </Grid>
             {cancerType === '기타' && (
@@ -141,6 +237,49 @@ const SurveyForm = () => {
                   placeholder="예: 췌장암"
                   value={otherCancerType}
                   onChange={(e) => setOtherCancerType(e.target.value)}
+                  error={!!errors.otherCancerType}
+                  helperText={errors.otherCancerType}
+                />
+              </Grid>
+            )}
+            <Grid item xs={12}>
+              <FormControl fullWidth error={!!errors.cancerStage}>
+                <InputLabel>처음 암 진단을 받으셨을 때 암의 진행단계는 몇 기였는지 선택하세요</InputLabel>
+                <Select value={cancerStage} onChange={(e) => setCancerStage(e.target.value)} label="암의 진행단계">
+                  <MenuItem value="0기">0기</MenuItem>
+                  <MenuItem value="1기">1기</MenuItem>
+                  <MenuItem value="2기">2기</MenuItem>
+                  <MenuItem value="3기">3기</MenuItem>
+                  <MenuItem value="4기">4기</MenuItem>
+                  <MenuItem value="모름">잘 모르겠다</MenuItem>
+                </Select>
+                <FormHelperText>{errors.cancerStage}</FormHelperText>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <FormControl fullWidth error={!!errors.otherCancerDiagnosis}>
+                <InputLabel>초기 진단 받았던 암 이외에 다른 유형의 암 진단을 받으신 적이 있습니까?</InputLabel>
+                <Select 
+                  value={otherCancerDiagnosis} 
+                  onChange={(e) => setOtherCancerDiagnosis(e.target.value)}
+                  label="초기 진단 받았던 암 이외에 다른 유형의 암 진단을 받으신 적이 있습니까?"
+                >
+                  <MenuItem value="예">예</MenuItem>
+                  <MenuItem value="아니오">아니오</MenuItem>
+                </Select>
+                <FormHelperText>{errors.otherCancerDiagnosis}</FormHelperText>
+              </FormControl>
+            </Grid>
+            {otherCancerDiagnosis === '예' && (
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="만약 진단 받은 적이 있다면, 어떤 암입니까?"
+                  placeholder="다른 유형의 암을 입력하세요"
+                  value={otherCancerDetails}
+                  onChange={(e) => setOtherCancerDetails(e.target.value)}
+                  error={!!errors.otherCancerDetails}
+                  helperText={errors.otherCancerDetails}
                 />
               </Grid>
             )}
@@ -150,13 +289,44 @@ const SurveyForm = () => {
           <Typography variant="h6" sx={{ mt: 4, mb: 1, fontWeight: 'bold' }}>💊 치료 정보</Typography>
           <Divider sx={{ mb: 2 }} />
 
+          <Grid container spacing={2} direction="column">
+            <Grid item xs={12}>
+              <FormControl fullWidth error={!!errors.hasSurgery}>
+                <InputLabel>암 치료를 위한 수술을 받은 경험이 있습니까?</InputLabel>
+                <Select 
+                  value={hasSurgery} 
+                  onChange={(e) => setHasSurgery(e.target.value)}
+                  label="암 치료를 위한 수술을 받은 경험이 있습니까?"
+                >
+                  <MenuItem value="예">예</MenuItem>
+                  <MenuItem value="아니오">아니오</MenuItem>
+                </Select>
+                <FormHelperText>{errors.hasSurgery}</FormHelperText>
+              </FormControl>
+            </Grid>
+            {hasSurgery === '예' && (
+              <Grid item xs={12}>
+                <TextField
+                  label="만약 수술 경험이 있다면, 그 날짜는 언제입니까?"
+                  type="date"
+                  fullWidth
+                  value={surgeryDate}
+                  onChange={(e) => setSurgeryDate(e.target.value)}
+                  InputLabelProps={{ shrink: true }}
+                  error={!!errors.surgeryDate}
+                  helperText={errors.surgeryDate}
+                />
+              </Grid>
+            )}
+          </Grid>
+
           <Box sx={{ mt: 3 }}>
             <Typography variant="subtitle1" fontWeight="bold" color="#003366" gutterBottom>
               받은 치료 유형 (해당하는 모든 항목 선택)
             </Typography>
 
             <FormGroup>
-              {['수술', '항암화학요법', '방사선 치료', '호르몬 치료', '면역 치료', '표적 치료'].map((treatment) => (
+              {['수술', '항암화학요법', '방사선 치료', '호르몬 치료', '면역 치료', '표적 치료', '기타'].map((treatment) => (
                 <FormControlLabel
                   key={treatment}
                   control={
@@ -171,51 +341,34 @@ const SurveyForm = () => {
                 />
               ))}
             </FormGroup>
+            {errors.treatmentTypes && (
+              <FormHelperText error>{errors.treatmentTypes}</FormHelperText>
+            )}
 
             {/* 기타 항목 */}
-            <Box sx={{ mb: 3 }}>
-              <FormGroup>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={treatmentTypes.includes('기타')}
-                      onChange={handleTreatmentChange}
-                      value="기타"
-                      sx={{ transform: 'scale(1.2)' }}
-                    />
-                  }
-                  label={<Typography sx={{ fontSize: '1rem' }}>기타</Typography>}
-                />
-              </FormGroup>
-
-              {treatmentTypes.includes('기타') && (
-                <TextField
-                  fullWidth
-                  label="기타 치료 유형을 입력하세요"
-                  placeholder="예: 고강도 초음파 치료"
-                  value={otherTreatmentType}
-                  onChange={(e) => setOtherTreatmentType(e.target.value)}
-                  sx={{ mt: 1 }}
-                />
-              )}
-            </Box>
+            {treatmentTypes.includes('기타') && (
+              <TextField
+                fullWidth
+                label="기타 치료 유형을 입력하세요"
+                placeholder="예: 고강도 초음파 치료"
+                value={otherTreatmentType}
+                onChange={(e) => setOtherTreatmentType(e.target.value)}
+                sx={{ mt: 1, mb: 3 }}
+                error={!!errors.otherTreatmentType}
+                helperText={errors.otherTreatmentType}
+              />
+            )}
           </Box>
 
-          <Grid container spacing={2} direction="column" >
-            <Grid item xs={12} >
+          <Grid container spacing={2} direction="column" sx={{ mt: 2 }}>
+            <Grid item xs={12}>
               <FormControl fullWidth>
-                <InputLabel>현재 치료 상태</InputLabel>
-                <Select value={currentTreatment} onChange={(e) => setCurrentTreatment(e.target.value)}>
-                  <MenuItem value="치료 전">아직 치료를 시작하지 않음</MenuItem>
-                  <MenuItem value="치료 중">지금 치료를 받고 있음(수술,항암,방사선,약물치료)</MenuItem>
-                  <MenuItem value="경과 확인 중">치료를 마치고 경과를 지켜보고 있음(정기검사)</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={12} >
-              <FormControl fullWidth>
-                <InputLabel>정신건강 이력</InputLabel>
-                <Select value={mentalHealthHistory} onChange={(e) => setMentalHealthHistory(e.target.value)}>
+                <InputLabel>암이 재발되거나 전이된 적이 있습니까?</InputLabel>
+                <Select 
+                  value={hasRecurrence} 
+                  onChange={(e) => setHasRecurrence(e.target.value)} 
+                  label="암이 재발되거나 전이된 적이 있습니까?"
+                >
                   <MenuItem value="예">예</MenuItem>
                   <MenuItem value="아니오">아니오</MenuItem>
                 </Select>
@@ -223,21 +376,110 @@ const SurveyForm = () => {
             </Grid>
           </Grid>
 
-          <TextField
-            label="신체적 제한 사항"
-            placeholder="암 치료로 인한 신체적 제한 사항이 있다면 적어주세요(몸이 많이 피로해요.), 없으면 없음으로 작성해주세요."
-            minRows={3}
-            fullWidth
-            sx={{
-              mt: 2,
-              '& .MuiInputBase-input::placeholder': {
-                fontSize: '0.85rem', // 원하는 크기로 조정
-                color: '#9e9e9e',
-              },
-            }}
-            value={physicalLimitations}
-            onChange={(e) => setPhysicalLimitations(e.target.value)}
-          />
+          {/* Section: 정신 건강 정보 */}
+          <Typography variant="h6" sx={{ mt: 4, mb: 1, fontWeight: 'bold' }}>🧠 정신 건강 정보</Typography>
+          <Divider sx={{ mb: 2 }} />
+          
+          <Grid container spacing={2} direction="column">
+            <Grid item xs={12}>
+              <FormControl fullWidth error={!!errors.mentalHealthHistory}>
+                <InputLabel>정신과적 진단을 받은 경험이 있습니까?</InputLabel>
+                <Select 
+                  value={mentalHealthHistory} 
+                  onChange={(e) => setMentalHealthHistory(e.target.value)}
+                  label="정신과적 진단을 받은 경험이 있습니까?"
+                >
+                  <MenuItem value="예">예</MenuItem>
+                  <MenuItem value="아니오">아니오</MenuItem>
+                </Select>
+                <FormHelperText>{errors.mentalHealthHistory}</FormHelperText>
+              </FormControl>
+            </Grid>
+            
+            {mentalHealthHistory === '예' && (
+              <>
+                <Grid item xs={12}>
+                  <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                    받은 정신과적 진단 (해당하는 모든 항목 선택)
+                  </Typography>
+                  <FormGroup>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={mentalHealthDiagnoses.depression}
+                          onChange={handleMentalHealthDiagnosisChange('depression')}
+                          sx={{ transform: 'scale(1.2)' }}
+                        />
+                      }
+                      label="우울증"
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={mentalHealthDiagnoses.anxietyDisorder}
+                          onChange={handleMentalHealthDiagnosisChange('anxietyDisorder')}
+                          sx={{ transform: 'scale(1.2)' }}
+                        />
+                      }
+                      label="불안장애"
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={mentalHealthDiagnoses.schizophrenia}
+                          onChange={handleMentalHealthDiagnosisChange('schizophrenia')}
+                          sx={{ transform: 'scale(1.2)' }}
+                        />
+                      }
+                      label="조현병"
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={mentalHealthDiagnoses.other}
+                          onChange={handleMentalHealthDiagnosisChange('other')}
+                          sx={{ transform: 'scale(1.2)' }}
+                        />
+                      }
+                      label="기타 정신질환"
+                    />
+                  </FormGroup>
+                </Grid>
+                
+                {mentalHealthDiagnoses.other && (
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      label="기타 정신질환 진단명"
+                      placeholder="진단명을 입력하세요"
+                      value={otherMentalDiagnosis}
+                      onChange={(e) => setOtherMentalDiagnosis(e.target.value)}
+                      error={!!errors.otherMentalDiagnosis}
+                      helperText={errors.otherMentalDiagnosis}
+                    />
+                  </Grid>
+                )}
+                
+                <Grid item xs={12}>
+                  <FormControl fullWidth error={!!errors.mentalHealthImpact}>
+                    <InputLabel>위와 같은 정신과적 증상이 귀하의 일상생활에 얼마나 방해가 되었습니까?</InputLabel>
+                    <Select
+                      value={mentalHealthImpact}
+                      onChange={(e) => setMentalHealthImpact(e.target.value)}
+                      label="위와 같은 정신과적 증상이 귀하의 일상생활에 얼마나 방해가 되었습니까?"
+                    >
+                      <MenuItem value="전혀 아님">전혀 아님</MenuItem>
+                      <MenuItem value="거의 아님">거의 아님</MenuItem>
+                      <MenuItem value="보통">보통</MenuItem>
+                      <MenuItem value="종종">종종</MenuItem>
+                      <MenuItem value="자주">자주</MenuItem>
+                    </Select>
+                    <FormHelperText>{errors.mentalHealthImpact}</FormHelperText>
+                  </FormControl>
+                </Grid>
+              </>
+            )}
+          </Grid>
 
           {/* 버튼 */}
           <Grid container spacing={2} mt={4}>
