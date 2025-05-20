@@ -1,7 +1,7 @@
 // src/components/Section7Component.js
 // Section7: 추가 섹션 (절주, 금연) 질문
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Box,
   FormControl,
@@ -10,8 +10,22 @@ import {
   FormControlLabel,
   Radio
 } from '@mui/material';
+import { saveUserAnswers } from '../utils/firebaseUtils';  // Firestore 저장 함수 import
 
-const Section7Component = ({ answers, setAnswers }) => {
+// props에 name 추가
+const Section7Component = ({ name, answers, setAnswers }) => {
+  // answers 변경 시마다 Firestore에 저장
+  useEffect(() => {
+    console.log('Section7Component useEffect – name:', name, 'answers:', answers);
+    if (!name) {
+      console.log('useEffect aborted – no name provided');
+      return;
+    }
+    saveUserAnswers(name, answers)
+      .then(() => console.log(`Saved Section7 answers for ${name}`))
+      .catch(err => console.error('Error saving Section7 answers:', err));
+  }, [answers, name]);
+
   const questions = [
     { id: 'q32', label: '암 발병 이후, 절주 하고 있다.' },
     { id: 'q33', label: '암 발병 이후, 금연 하고 있다.' }
@@ -26,28 +40,30 @@ const Section7Component = ({ answers, setAnswers }) => {
   ];
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setAnswers((prev) => ({ ...prev, [name]: value }));
+    const { name: questionId, value } = e.target;
+    setAnswers(prev => ({ ...prev, [questionId]: value }));
   };
 
   return (
     <Box>
       {questions.map((q) => (
         <FormControl component="fieldset" key={q.id} sx={{ mb: 2 }} fullWidth>
-          <FormLabel component="legend"
-          sx={{ fontWeight: 'bold' ,color: 'primary.main' }}
-          >{q.label}</FormLabel>
-
-          <RadioGroup 
-          //row 
-          name={q.id} 
-          value={answers[q.id] || ''} 
-          onChange={handleChange}>
+          <FormLabel
+            component="legend"
+            sx={{ fontWeight: 'bold', color: 'primary.main' }}
+          >
+            {q.label}
+          </FormLabel>
+          <RadioGroup
+            name={q.id}
+            value={answers[q.id] || ''}
+            onChange={handleChange}
+          >
             {options.map((opt) => (
               <FormControlLabel
                 key={opt.value}
                 value={opt.value}
-                control={<Radio />}
+                control={<Radio color="primary" />}
                 label={opt.label}
               />
             ))}

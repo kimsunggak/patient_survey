@@ -1,17 +1,18 @@
 // src/pages/Section7Page.js
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Container,
   Typography,
   Box,
   Paper,
   Button,
-  Alert, AlertTitle,
+  Alert,
+  AlertTitle,
   LinearProgress
 } from '@mui/material';
 import Section7Component from '../component/Section7Component';
-import { saveUserAnswers } from '../utils/firebaseUtils'; // 추가
+import { getUserAnswers } from '../utils/firebaseUtils';  // Firestore에서 기존 답변 불러오기
 
 const steps = [
   '암 이후 내 몸의 변화',
@@ -25,31 +26,35 @@ const steps = [
 
 const Section7Page = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const [answers, setAnswers] = useState(location.state?.answers || {});
-  const userName = location.state?.userName; // userName 가져오기
+  const { state } = useLocation();
+  // SurveyForm 또는 로컬스토리지에서 사용자 이름 가져오기
+  const userName = state?.name || localStorage.getItem('userName') || '';
+
+  const [answers, setAnswers] = useState({});
   const [error, setError] = useState(false);
 
+  // 마운트 시 기존 답변 불러오기
+  useEffect(() => {
+    if (!userName) return;
+    getUserAnswers(userName)
+      .then(data => {
+        setAnswers(data || {});
+        console.log('Loaded Section7 answers:', data);
+      })
+      .catch(err => console.error('Error loading Section7 answers:', err));
+  }, [userName]);
+
   const total = 2;  // Q32~Q33
-  const done = ['q32', 'q33'].filter((id) => answers[id]).length;
+  const done = ['q32','q33'].filter(id => answers[id]).length;
   const progress = (done / total) * 100;
   const currentStep = 6;
 
-  const handleNext = async () => { // async 추가
-    if (done < total) return setError(true);
-    if (!userName) {
-      alert("사용자 정보가 없습니다. 처음부터 다시 시도해주세요.");
-      navigate('/'); // 홈으로 이동 또는 다른 적절한 처리
+  const handleNext = () => {
+    if (done < total) {
+      setError(true);
       return;
     }
-    try {
-      await saveUserAnswers(userName, answers); // 설문 답변 저장
-      console.log("설문 답변 저장 완료 for:", userName);
-      navigate('/survey-result', { state: { userName, answers } }); // 결과 페이지로 userName과 answers 전달
-    } catch (e) {
-      console.error("설문 답변 저장 실패:", e);
-      alert("답변 저장에 실패했습니다. 다시 시도해주세요.");
-    }
+    navigate('/survey-result', { state: { name: userName } });
   };
 
   useEffect(() => {
@@ -57,8 +62,7 @@ const Section7Page = () => {
   }, [done]);
 
   return (
-    <Container maxWidth="md" sx={{ py: 4, background: 'none',
-      bgcolor: 'background.default' }}>
+    <Container maxWidth="md" sx={{ py: 4, bgcolor: 'background.default' }}>
       <Typography variant="h4" align="center" gutterBottom sx={{ fontWeight: 'bold' }}>
         암 생존자 건강관리 설문
       </Typography>
@@ -78,9 +82,15 @@ const Section7Page = () => {
             <Box key={label} sx={{ flex: 1, textAlign: 'center' }}>
               <Box
                 sx={{
-                  width: 32, height: 32, mx: 'auto',
-                  borderRadius: '50%', bgcolor: bg, color: '#fff',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center'
+                  width: 32,
+                  height: 32,
+                  mx: 'auto',
+                  borderRadius: '50%',
+                  bgcolor: bg,
+                  color: '#fff',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
                 }}
               >
                 {idx + 1}
@@ -94,7 +104,7 @@ const Section7Page = () => {
       </Box>
 
       <Paper elevation={3} sx={{ p: 4 }}>
-        <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, textAlign: "center" }}>
+        <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, textAlign: 'center' }}>
           {steps[currentStep]}
         </Typography>
 
@@ -105,7 +115,11 @@ const Section7Page = () => {
           </Typography>
         </Box>
 
-        <Section7Component answers={answers} setAnswers={setAnswers} />
+        <Section7Component
+          name={userName}
+          answers={answers}
+          setAnswers={setAnswers}
+        />
 
         {error && (
           <Alert severity="warning" sx={{ mt: 2 }}>
@@ -115,7 +129,7 @@ const Section7Page = () => {
         )}
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-          <Button variant="outlined" onClick={() => navigate('/section6')}>
+          <Button variant="outlined" onClick={() => navigate('/section6', { state: { name: userName } })}>
             이전
           </Button>
           <Button variant="contained" onClick={handleNext}>
