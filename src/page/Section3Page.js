@@ -25,41 +25,36 @@ const steps = [
 
 const Section3Page = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const userName = location.state?.userName; // Retrieve userName
-  const [answers, setAnswers] = useState(location.state?.answers || { q15_reasons: [] }); // Retrieve and initialize answers
+  const { state } = useLocation();
+  // SurveyForm 또는 로컬스토리지에서 사용자 이름 가져오기
+  const userName = state?.name || localStorage.getItem('userName') || '';
+
+  const [answers, setAnswers] = useState({ q15_reasons: [] });
   const [error, setError] = useState(false);
 
-  // 진행 표시: q14~q17만 카운트, total 4
+  // Q14~Q17 진행
   const requiredIds = ['q14', 'q15', 'q16', 'q17'];
-  const doneCount = requiredIds.filter((id) => answers[id]).length;
-  const total = 4;
+  const doneCount = requiredIds.filter(id => answers[id]).length;
+  const total = requiredIds.length;
   const progress = (doneCount / total) * 100;
   const currentStep = 2;
 
-  // 답변 준비 여부 판단
-  const isNeg = answers.q15 === '1' || answers.q15 === '2';
-  const requiredAnswered = requiredIds.every((id) => answers[id]);
-  const ready = isNeg
-    ? requiredAnswered && !!answers.q15_reason
-    : requiredAnswered;
+  // Q15-1 조건
+  const needsReasons = answers.q15 === '1' || answers.q15 === '2';
+  const ready = needsReasons
+    ? doneCount === total && answers.q15_reasons.length > 0
+    : doneCount === total;
 
   const handleNext = () => {
     if (!ready) {
       setError(true);
       return;
     }
-    navigate('/section4', { state: { userName, answers } }); // Pass userName and answers
-  };
-
-  const handlePrev = () => {
-    navigate('/section2', { state: { userName, answers } }); // Pass userName and answers
+    navigate('/section4', { state: { name: userName } });
   };
 
   useEffect(() => {
-    if (ready) {
-      setError(false);
-    }
+    if (ready) setError(false);
   }, [ready]);
 
   return (
@@ -137,7 +132,10 @@ const Section3Page = () => {
           </Typography>
         </Box>
 
-        <Section3Component answers={answers} setAnswers={setAnswers} />
+        <Section3Component e={userName}
+          answers={answers}
+          setAnswers={setAnswers}
+        />
 
         {/* error가 true일 때만 Alert 보이기 */}
         {error && (
@@ -148,7 +146,7 @@ const Section3Page = () => {
         )}
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-          <Button variant="outlined" onClick={handlePrev}>
+          <Button variant="outlined" onClick={() => navigate('/section2')}>
             이전
           </Button>
           <Button variant="contained" onClick={handleNext}>

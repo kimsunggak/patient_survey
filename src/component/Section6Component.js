@@ -1,7 +1,6 @@
 // src/components/Section6Component.js
 // Section6: 암 이후 탄력성 질문 (Q29~Q31)
-
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Box,
   FormControl,
@@ -10,8 +9,23 @@ import {
   FormControlLabel,
   Radio
 } from '@mui/material';
+import { saveUserAnswers } from '../utils/firebaseUtils';
 
-const Section6Component = ({ answers, setAnswers }) => {
+
+// props에 name 추가
+const Section6Component = ({ name, answers, setAnswers }) => {
+  // answers 변경 시마다 Firestore에 저장
+  useEffect(() => {
+    console.log('Section6Component useEffect – name:', name, 'answers:', answers);
+    if (!name) {
+      console.log('useEffect aborted – no name provided');
+      return;
+    }
+    saveUserAnswers(name, answers)
+      .then(() => console.log(`Saved Section6 answers for ${name}`))
+      .catch(err => console.error('Error saving Section6 answers:', err));
+  }, [answers, name]);
+
   const questions = [
     { id: 'q29', label: '29. 암 치료가 끝났지만, 여전히 건강관리는 중요하다.' },
     { id: 'q30', label: '30. 나는 암을 잘 견뎌냈다는 자신감이 있다.' },

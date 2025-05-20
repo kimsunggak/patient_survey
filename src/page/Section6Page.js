@@ -11,6 +11,7 @@ import {
   LinearProgress
 } from '@mui/material';
 import Section6Component from '../component/Section6Component';
+import { getUserAnswers } from '../utils/firebaseUtils';  // Firestore에서 기존 답변 불러오기
 
 const steps = [
   '암 이후 내 몸의 변화',
@@ -24,10 +25,23 @@ const steps = [
 
 const Section6Page = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const userName = location.state?.userName; // Retrieve userName
-  const [answers, setAnswers] = useState(location.state?.answers || {}); // Retrieve and initialize answers
+  const { state } = useLocation();
+  // SurveyForm 또는 로컬스토리지에서 사용자 이름 가져오기
+  const userName = state?.name || localStorage.getItem('userName') || '';
+
+  const [answers, setAnswers] = useState({});
   const [error, setError] = useState(false);
+
+  // 마운트 시 기존 답변 불러오기
+  useEffect(() => {
+    if (!userName) return;
+    getUserAnswers(userName)
+      .then(data => {
+        setAnswers(data || {});
+        console.log('Loaded Section6 answers:', data);
+      })
+      .catch(err => console.error('Error loading Section6 answers:', err));
+  }, [userName]);
 
   const total = 3;  // Q29~Q31
   const done = ['q29', 'q30', 'q31'].filter((id) => answers[id]).length;
@@ -35,12 +49,11 @@ const Section6Page = () => {
   const currentStep = 5;
 
   const handleNext = () => {
-    if (done < total) return setError(true);
-    navigate('/section7', { state: { userName, answers } }); // Pass userName and answers
-  };
-
-  const handlePrev = () => {
-    navigate('/section5', { state: { userName, answers } }); // Pass userName and answers
+    if (done < total) {
+      setError(true);
+      return;
+    }
+    navigate('/section7', { state: { name: userName } });
   };
 
   useEffect(() => {
@@ -96,7 +109,7 @@ const Section6Page = () => {
           </Typography>
         </Box>
 
-        <Section6Component answers={answers} setAnswers={setAnswers} />
+        <Section6Component   name={userName} answers={answers} setAnswers={setAnswers} />
 
         {error && (
           <Alert severity="warning" sx={{ mt: 2 }}>
@@ -106,7 +119,7 @@ const Section6Page = () => {
         )}
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-          <Button variant="outlined" onClick={handlePrev}>
+          <Button variant="outlined"  onClick={() => navigate('/section5', { state: { name: userName } })}>
             이전
           </Button>
           <Button variant="contained" onClick={handleNext}>

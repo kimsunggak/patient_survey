@@ -1,7 +1,7 @@
 // src/components/Section3Component.js
 // Section3: 회복하도록 도와주는 사람들 질문 (Q14~Q17 및 Q15-1 하위 문항)
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Box,
   FormControl,
@@ -12,8 +12,21 @@ import {
   Checkbox,
   FormGroup
 } from '@mui/material';
+import { saveUserAnswers } from '../utils/firebaseUtils';  // Firestore 저장 함수 import
 
-const Section3Component = ({ answers, setAnswers }) => {
+const Section3Component = ({ name, answers, setAnswers }) => {
+  // answers 변경 시마다 Firestore에 저장
+  useEffect(() => {
+    console.log('Section3Component useEffect – name:', name, 'answers:', answers);
+    if (!name) {
+      console.log('useEffect aborted – no name provided');
+      return;
+    }
+    saveUserAnswers(name, answers)
+      .then(() => console.log(`Saved Section3 answers for ${name}`))
+      .catch(err => console.error('Error saving Section3 answers:', err));
+  }, [answers, name]);
+
   // Q14~Q17 라디오 질문
   const questions = [
     { id: 'q14', label: '14. 우리 가족은 나에게 실질적인 도움을 주고 있다.' },
@@ -43,120 +56,111 @@ const Section3Component = ({ answers, setAnswers }) => {
 
   // 라디오 변경 핸들러
   const handleRadio = (e) => {
-    const { name, value } = e.target;
-    setAnswers((prev) => ({ ...prev, [name]: value }));
+    const { name: questionId, value } = e.target;
+    setAnswers(prev => ({ ...prev, [questionId]: value }));
+  };
+
+  const handleReasons15 = (e) => {
+    const { value } = e.target;
+    const prev = answers.q15_reasons || [];
+    const next = prev.includes(value) ? prev.filter(v => v !== value) : [...prev, value];
+    setAnswers(prev => ({ ...prev, q15_reasons: next }));
   };
 
   return (
-    <Box>
-      {/* Q14 */}
+  <Box sx={{ backgroundColor: 'background.paper', p: 3, borderRadius: 2, boxShadow: 1 }}>
+    {/* Q14 */}
+    <FormControl component="fieldset" sx={{ mb: 2 }} fullWidth>
+      <FormLabel component="legend" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+        {questions[0].label}
+      </FormLabel>
+      <RadioGroup name={questions[0].id} value={answers[questions[0].id] || ''} onChange={handleRadio}>
+        {options.map(opt => (
+          <FormControlLabel
+            key={opt.value}
+            value={opt.value}
+            control={<Radio />}
+            label={opt.label}
+          />
+        ))}
+      </RadioGroup>
+    </FormControl>
+
+    {/* Q15 */}
+    <FormControl component="fieldset" sx={{ mb: 2 }} fullWidth>
+      <FormLabel component="legend" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+        {questions[1].label}
+      </FormLabel>
+      <RadioGroup name={questions[1].id} value={answers[questions[1].id] || ''} onChange={handleRadio}>
+        {options.map(opt => (
+          <FormControlLabel
+            key={opt.value}
+            value={opt.value}
+            control={<Radio />}
+            label={opt.label}
+          />
+        ))}
+      </RadioGroup>
+    </FormControl>
+
+    {/* Q15-1: Q15에서 1,2번 선택 시 바로 아래에 표시 */}
+    {(answers.q15 === '1' || answers.q15 === '2') && (
       <FormControl component="fieldset" sx={{ mb: 2 }} fullWidth>
-        <FormLabel component="legend" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
-          {questions[0].label}
+        <FormLabel component="legend" sx={{ fontWeight: 'bold', display: 'block', mb: 1, color: 'text.primary' }}>
+          ※ 15-1. 귀하께서 가족으로부터 관심과 도움을 받지 못하는 이유 (해당되는 것 모두 체크)
         </FormLabel>
-        <RadioGroup
-          name={questions[0].id}
-          value={answers[questions[0].id] || ''}
-          onChange={handleRadio}
-        >
-          {options.map((opt) => (
+        <FormGroup>
+          {reasons15.map((reason, idx) => (
             <FormControlLabel
-              key={opt.value}
-              value={opt.value}
-              control={<Radio />}
-              label={opt.label}
+              key={idx}
+              control={
+                <Checkbox
+                  checked={(answers.q15_reasons || []).includes(reason)}
+                  onChange={handleReasons15}
+                  value={reason}
+                />
+              }
+              label={reason}
             />
           ))}
-        </RadioGroup>
+        </FormGroup>
       </FormControl>
+    )}
 
-      {/* Q15 */}
-      <FormControl component="fieldset" sx={{ mb: 2 }} fullWidth>
-        <FormLabel component="legend" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
-          {questions[1].label}
-        </FormLabel>
-        <RadioGroup
-          name={questions[1].id}
-          value={answers[questions[1].id] || ''}
-          onChange={handleRadio}
-        >
-          {options.map((opt) => (
-            <FormControlLabel
-              key={opt.value}
-              value={opt.value}
-              control={<Radio />}
-              label={opt.label}
-            />
-          ))}
-        </RadioGroup>
-      </FormControl>
+    {/* Q16 */}
+    <FormControl component="fieldset" sx={{ mb: 2 }} fullWidth>
+      <FormLabel component="legend" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+        {questions[2].label}
+      </FormLabel>
+      <RadioGroup name={questions[2].id} value={answers[questions[2].id] || ''} onChange={handleRadio}>
+        {options.map(opt => (
+          <FormControlLabel
+            key={opt.value}
+            value={opt.value}
+            control={<Radio />}
+            label={opt.label}
+          />
+        ))}
+      </RadioGroup>
+    </FormControl>
 
-      {/* Q15-1: Q15가 1 또는 2인 경우에만 표시, 라디오 버튼으로 단일 선택 */}
-      {(answers.q15 === '1' || answers.q15 === '2') && (
-        <FormControl component="fieldset" sx={{ mb: 2 }} fullWidth>
-          <FormLabel component="legend" sx={{ fontWeight: 'bold', display: 'block', mb: 1, color: 'text.primary' }}>
-          ※ 15-1. 귀하께서 가족으로부터 관심과 도움을 받지 못하는 이유 (하나만 선택)
-          </FormLabel>
-          <RadioGroup
-            name="q15_reason"
-            value={answers.q15_reason || ''}
-            onChange={handleRadio}
-          >
-            {reasons15.map((reason, idx) => (
-              <FormControlLabel
-                key={idx}
-                value={reason}
-                control={<Radio />}
-                label={reason}
-              />
-            ))}
-          </RadioGroup>
-        </FormControl>
-      )}
-
-      {/* Q16 */}
-      <FormControl component="fieldset" sx={{ mb: 2 }} fullWidth>
-        <FormLabel component="legend" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
-          {questions[2].label}
-        </FormLabel>
-        <RadioGroup
-          name={questions[2].id}
-          value={answers[questions[2].id] || ''}
-          onChange={handleRadio}
-        >
-          {options.map((opt) => (
-            <FormControlLabel
-              key={opt.value}
-              value={opt.value}
-              control={<Radio />}
-              label={opt.label}
-            />
-          ))}
-        </RadioGroup>
-      </FormControl>
-
-      {/* Q17 */}
-      <FormControl component="fieldset" sx={{ mb: 2 }} fullWidth>
-        <FormLabel component="legend" sx={{ fontWeight: 'bold' , color: 'primary.main'}}>
-          {questions[3].label}
-        </FormLabel>
-        <RadioGroup
-          name={questions[3].id}
-          value={answers[questions[3].id] || ''}
-          onChange={handleRadio}
-        >
-          {options.map((opt) => (
-            <FormControlLabel
-              key={opt.value}
-              value={opt.value}
-              control={<Radio />}
-              label={opt.label}
-            />
-          ))}
-        </RadioGroup>
-      </FormControl>
-    </Box>
+    {/* Q17 */}
+    <FormControl component="fieldset" sx={{ mb: 2 }} fullWidth>
+      <FormLabel component="legend" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+        {questions[3].label}
+      </FormLabel>
+      <RadioGroup name={questions[3].id} value={answers[questions[3].id] || ''} onChange={handleRadio}>
+        {options.map(opt => (
+          <FormControlLabel
+            key={opt.value}
+            value={opt.value}
+            control={<Radio />}
+            label={opt.label}
+          />
+        ))}
+      </RadioGroup>
+    </FormControl>
+  </Box>
   );
-};
-
+}
 export default Section3Component;

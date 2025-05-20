@@ -64,7 +64,7 @@ const Section2Page = () => {
     setError(true);
     return;
   }
-  navigate('/section3', { state: { userName, answers } }); // 반드시 answers 같이 전달!
+   navigate('/section3', { state: { name: userName } });
 };
 
   useEffect(() => {

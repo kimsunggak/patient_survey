@@ -1,5 +1,5 @@
 // src/components/Section1Component.js
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Box,
   FormControl,
@@ -8,8 +8,29 @@ import {
   FormControlLabel,
   Radio
 } from '@mui/material';
+import { saveUserAnswers } from '../utils/firebaseUtils';
 
-const Section1Component = ({ answers, setAnswers }) => {
+const Section1Component = ({ name, answers, setAnswers }) => {
+  console.log('Section1Component render – name:', name, 'answers:', answers);
+
+  useEffect(() => {
+    console.log('useEffect triggered – name:', name, 'answers:', answers);
+    if (!name) {
+      console.log('useEffect aborted – no name provided');
+      return;
+    }
+    saveUserAnswers(name, answers)
+      .then(() => console.log(`Saved answers for ${name}`))
+      .catch(err => console.error('Error saving answers:', err));
+  }, [answers, name]);
+
+  const handleChange = (e) => {
+    const { name: questionId, value } = e.target;
+    console.log('handleChange – questionId:', questionId, 'value:', value);
+    setAnswers(prev => ({ ...prev, [questionId]: value }));
+  };
+
+  
   const questions = [
     { id: 'q1', label: '1. 암 발병 전과 비교해서 무언가에 집중하기 어렵다.' },
     { id: 'q2', label: '2. 암 발병 전과 비교해서 무언가를 기억하는데 어려움이 있다.' },
@@ -29,11 +50,7 @@ const Section1Component = ({ answers, setAnswers }) => {
     { value: '5', label: '매우 그렇다' }
   ];
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setAnswers((prev) => ({ ...prev, [name]: value }));
-  };
-
+  
   return (
     <Box
       sx={{
@@ -67,15 +84,15 @@ const Section1Component = ({ answers, setAnswers }) => {
           >
             {options.map((opt) => (
               <FormControlLabel
-  key={opt.value}
-  value={opt.value}
-  control={<Radio color="primary" />}
-  label={opt.label}
-  sx={{ my: 0.5 }}
-  componentsProps={{
-    typography: {
-      sx: {
-        color: 'text.secondary'
+              key={opt.value}
+              value={opt.value}
+              control={<Radio color="primary" />}
+              label={opt.label}
+              sx={{ my: 0.5 }}
+              componentsProps={{
+              typography: {
+              sx: {
+              color: 'text.secondary'
       }
     }
   }}

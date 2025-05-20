@@ -24,29 +24,32 @@ const steps = [
 
 const Section4Page = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const userName = location.state?.userName; // Retrieve userName
-  const [answers, setAnswers] = useState(location.state?.answers || {}); // Retrieve and initialize answers
+  const { state } = useLocation();
+  // SurveyForm 또는 로컬스토리지에서 사용자 이름을 가져옴
+  const userName = state?.name || localStorage.getItem('userName') || '';
+
+  const [answers, setAnswers] = useState({});
   const [error, setError] = useState(false);
 
-  const total = 8;  // Q18~Q25
-  const done = ['q18', 'q19', 'q20', 'q21', 'q22', 'q23', 'q24', 'q25']
-    .filter((id) => answers[id]).length;
+  const total = 8; // Q18~Q25
+  const done = [
+    'q18','q19','q20','q21','q22','q23','q24','q25'
+  ].filter(id => answers[id]).length;
   const progress = (done / total) * 100;
   const currentStep = 3;
 
   const handleNext = () => {
-    if (done < total) return setError(true);
-    navigate('/section5', { state: { userName, answers } }); // Pass userName and answers
-  };
-
-  const handlePrev = () => {
-    navigate('/section3', { state: { userName, answers } }); // Pass userName and answers
+    if (done < total) {
+      setError(true);
+      return;
+    }
+    navigate('/section5', { state: { name: userName } });
   };
 
   useEffect(() => {
     if (done === total) setError(false);
   }, [done]);
+
 
   return (
     <Container maxWidth="md" sx={{ py: 4, background: 'none',
@@ -97,7 +100,9 @@ const Section4Page = () => {
           </Typography>
         </Box>
 
-        <Section4Component answers={answers} setAnswers={setAnswers} />
+        <Section4Component name={userName}
+          answers={answers}
+          setAnswers={setAnswers}/>
 
         {/* error가 true일 때만 Alert 보이기 */}
         {error && (
@@ -108,7 +113,7 @@ const Section4Page = () => {
         )}
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}>
-          <Button variant="outlined" onClick={handlePrev}>
+          <Button variant="outlined" onClick={() => navigate('/section3', { state: { name: userName } })}>
             이전
           </Button>
           <Button variant="contained" onClick={handleNext}>

@@ -11,6 +11,7 @@ import {
   LinearProgress
 } from '@mui/material';
 import Section1Component from '../component/Section1Component';
+import { saveUserAnswers } from '../utils/firebaseUtils';
 
 const steps = [
   '암 이후 내 몸의 변화',
@@ -24,20 +25,33 @@ const steps = [
 
 const Section1Page = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const [answers, setAnswers] = useState(location.state?.answers || {});
-  const userName = location.state?.userName; // userName 가져오기
+  const { state } = useLocation();
+  const userName = state?.userName || localStorage.getItem('userName') || '';
+  const [answers, setAnswers] = useState({});
   const [error, setError] = useState(false);
 
   const total = 8;  // Q1~Q8
-  const done = Object.keys(answers).filter((k) => answers[k]).length;
+  const done = Object.keys(answers).filter(k => answers[k]).length;
   const progress = (done / total) * 100;
   const currentStep = 0;
 
-  const handleNext = () => {
-    if (done < total) return setError(true);
-    navigate('/section2', { state: { userName, answers } }); // userName과 answers 전달
+  const handleNext = async () => {
+    if (done < total) {
+      setError(true);
+      return;
+    }
+
+    const updatedAnswers = {
+      ...answers,
+    };
+
+
+    // Firebase에 사용자 답변 저장
+    await saveUserAnswers(userName, updatedAnswers);
+
+    navigate('/section2', { state: { name: userName } });
   };
+
   useEffect(() => {
     if (done === total) setError(false);
   }, [done]);
@@ -96,8 +110,10 @@ const Section1Page = () => {
         </Box>
 
         {/* 질문 컴포넌트 */}
-        <Section1Component answers={answers} setAnswers={setAnswers} />
-
+        <Section1Component name={userName}
+          answers={answers}
+          setAnswers={setAnswers}
+        />
          {/* error가 true일 때만 Alert 보이기 */}
          {error && (
           <Alert severity="warning" sx={{ mt: 2 }}>

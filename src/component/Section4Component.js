@@ -1,7 +1,7 @@
 // src/components/Section4Component.js
 // Section4: 심리적 부담 질문 (Q18~Q25)
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Box,
   FormControl,
@@ -11,7 +11,21 @@ import {
   Radio
 } from '@mui/material';
 
-const Section4Component = ({ answers, setAnswers }) => {
+import { saveUserAnswers } from '../utils/firebaseUtils';  // Firebase 저장 함수 import 추가
+
+// props에 name 추가
+const Section4Component = ({ name, answers, setAnswers }) => {
+  // answers 변경 시마다 Firestore에 저장
+  useEffect(() => {
+    console.log('Section4Component useEffect – name:', name, 'answers:', answers);
+    if (!name) {
+      console.log('useEffect aborted – no name provided');
+      return;
+    }
+    saveUserAnswers(name, answers)
+      .then(() => console.log(`Saved Section4 answers for ${name}`))
+      .catch(err => console.error('Error saving Section4 answers:', err));
+  }, [answers, name]);
   const questions = [
     { id: 'q18', label: '18. 암 치료 및 건강관리와 관련해서 가족과 의견차이가 있다.' },
     { id: 'q19', label: '19. 재발에 대한 불안을 느낀다.' },
