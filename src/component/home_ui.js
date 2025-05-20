@@ -8,10 +8,10 @@ import PeopleIcon from '@mui/icons-material/People';
 export const HeaderSection = () => (
   <Box textAlign="center" py={5}>
     <Typography variant="h4" fontWeight="bold" color="primary" gutterBottom>
-      암 생존자 건강관리
+      암 치료 여정 설문조사
     </Typography>
     <Typography variant="subtitle1" color="textSecondary">
-      다시 삶의 중심으로 돌아오는 여정을 함께합니다
+      치료 과정별 맞춤 지원 필요성 조사
     </Typography>
   </Box>
 );
