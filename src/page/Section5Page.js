@@ -37,12 +37,12 @@ const Section5Page = () => {
   const currentStep = 4;
 
   const handleNext = () => {
-    if (done < total) {
-      setError(true);
-      return;
-    }
-    navigate('/section6', { state: { name: userName } });
-  };
+  if (done < total) {
+    setError(true);
+    return;
+  }
+  navigate('/section6', { state: { userName, answers } }); // 반드시 answers 전달
+};
 
   useEffect(() => {
     if (done === total) setError(false);

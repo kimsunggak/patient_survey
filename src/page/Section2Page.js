@@ -60,12 +60,12 @@ const Section2Page = () => {
   const currentStep = 1;
 
   const handleNext = () => {
-    if (doneCount < totalCount) {
-      setError(true);
-      return;
-    }
-    navigate('/section3', { state: { name: userName } });
-  };
+  if (doneCount < totalCount) {
+    setError(true);
+    return;
+  }
+  navigate('/section3', { state: { userName, answers } }); // 반드시 answers 같이 전달!
+};
 
   useEffect(() => {
     if (doneCount === totalCount) setError(false);
