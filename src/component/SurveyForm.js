@@ -36,6 +36,15 @@ const SurveyForm = () => {
   const [mentalHealthImpact, setMentalHealthImpact] = useState('');
   const [otherTreatmentType, setOtherTreatmentType] = useState('');
   const [errors, setErrors] = useState({});
+  const treatmentOptions = [
+    '수술',
+    '방사선치료',
+    '항암화학치료',
+    '호르몬치료',
+    '표적치료',
+    '면역치료',
+    '기타'
+  ];
 
   const handleTreatmentChange = (event) => {
     const { value } = event.target;
@@ -324,23 +333,30 @@ const SurveyForm = () => {
             <Typography variant="subtitle1" fontWeight="bold" color="#003366" gutterBottom>
               받은 치료 유형 (해당하는 모든 항목 선택)
             </Typography>
-
+            { /* 치료 유형 체크박스 */} 
             <FormGroup>
-              {['수술', '항암화학요법', '방사선 치료', '호르몬 치료', '면역 치료', '표적 치료', '기타'].map((treatment) => (
-                <FormControlLabel
-                  key={treatment}
-                  control={
-                    <Checkbox
-                      checked={treatmentTypes.includes(treatment)}
-                      onChange={handleTreatmentChange}
-                      value={treatment}
-                      sx={{ transform: 'scale(1.2)' }}
-                    />
-                  }
-                  label={treatment}
-                />
-              ))}
-            </FormGroup>
+  {treatmentOptions.map((treatment) => (
+    <FormControlLabel
+      key={treatment}
+      control={
+        <Checkbox
+          checked={treatmentTypes.includes(treatment)}
+          onChange={handleTreatmentChange}
+          value={treatment}
+          sx={{ transform: 'scale(1.2)' }}
+        />
+      }
+      label={treatment}
+      componentsProps={{
+        typography: {
+          variant: 'subtitle2',
+          color: 'text.secondary'
+        }
+      }}
+    />
+  ))}
+</FormGroup>
+
             {errors.treatmentTypes && (
               <FormHelperText error>{errors.treatmentTypes}</FormHelperText>
             )}
@@ -397,54 +413,81 @@ const SurveyForm = () => {
             </Grid>
             
             {mentalHealthHistory === '예' && (
-              <>
-                <Grid item xs={12}>
-                  <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
-                    받은 정신과적 진단 (해당하는 모든 항목 선택)
-                  </Typography>
-                  <FormGroup>
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={mentalHealthDiagnoses.depression}
-                          onChange={handleMentalHealthDiagnosisChange('depression')}
-                          sx={{ transform: 'scale(1.2)' }}
-                        />
-                      }
-                      label="우울증"
-                    />
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={mentalHealthDiagnoses.anxietyDisorder}
-                          onChange={handleMentalHealthDiagnosisChange('anxietyDisorder')}
-                          sx={{ transform: 'scale(1.2)' }}
-                        />
-                      }
-                      label="불안장애"
-                    />
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={mentalHealthDiagnoses.schizophrenia}
-                          onChange={handleMentalHealthDiagnosisChange('schizophrenia')}
-                          sx={{ transform: 'scale(1.2)' }}
-                        />
-                      }
-                      label="조현병"
-                    />
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          checked={mentalHealthDiagnoses.other}
-                          onChange={handleMentalHealthDiagnosisChange('other')}
-                          sx={{ transform: 'scale(1.2)' }}
-                        />
-                      }
-                      label="기타 정신질환"
-                    />
-                  </FormGroup>
-                </Grid>
+  <>
+    <Grid item xs={12}>
+      <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+        받은 정신과적 진단 (해당하는 모든 항목 선택)
+      </Typography>
+      <FormGroup>
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={mentalHealthDiagnoses.depression}
+              onChange={handleMentalHealthDiagnosisChange('depression')}
+              sx={{ transform: 'scale(1.2)' }}
+            />
+          }
+          label="우울증"
+          componentsProps={{
+            typography: {
+              variant: 'subtitle2',
+              color: 'text.secondary'
+            }
+          }}
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={mentalHealthDiagnoses.anxietyDisorder}
+              onChange={handleMentalHealthDiagnosisChange('anxietyDisorder')}
+              sx={{ transform: 'scale(1.2)' }}
+            />
+          }
+          label="불안장애"
+          componentsProps={{
+            typography: {
+              variant: 'subtitle2',
+              color: 'text.secondary'
+            }
+          }}
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={mentalHealthDiagnoses.schizophrenia}
+              onChange={handleMentalHealthDiagnosisChange('schizophrenia')}
+              sx={{ transform: 'scale(1.2)' }}
+            />
+          }
+          label="조현병"
+          componentsProps={{
+            typography: {
+              variant: 'subtitle2',
+              color: 'text.secondary'
+            }
+          }}
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={mentalHealthDiagnoses.other}
+              onChange={handleMentalHealthDiagnosisChange('other')}
+              sx={{ transform: 'scale(1.2)' }}
+            />
+          }
+          label="기타 정신질환"
+          componentsProps={{
+            typography: {
+              variant: 'subtitle2',
+              color: 'text.secondary'
+            }
+          }}
+        />
+      </FormGroup>
+      {errors.mentalHealthDiagnoses && (
+        <FormHelperText error>{errors.mentalHealthDiagnoses}</FormHelperText>
+      )}
+    </Grid>
                 
                 {mentalHealthDiagnoses.other && (
                   <Grid item xs={12}>

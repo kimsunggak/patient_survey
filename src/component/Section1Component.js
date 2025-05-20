@@ -67,17 +67,20 @@ const Section1Component = ({ answers, setAnswers }) => {
           >
             {options.map((opt) => (
               <FormControlLabel
-                key={opt.value}
-                value={opt.value}
-                control={<Radio color="primary" />}
-                label={opt.label}
-                sx={{ my: 0.5 }}
-                labelTypographyProps={{
-                  sx: {
-                    color: 'text.secondary'  // theme.palette.text.secondary (#757575)
-                  }
-                }}
-              />
+  key={opt.value}
+  value={opt.value}
+  control={<Radio color="primary" />}
+  label={opt.label}
+  sx={{ my: 0.5 }}
+  componentsProps={{
+    typography: {
+      sx: {
+        color: 'text.secondary'
+      }
+    }
+  }}
+/>
+
             ))}
           </RadioGroup>
         </FormControl>
