@@ -80,8 +80,13 @@ const SurveyForm = () => {
     // 치료 정보 검증
     if (!hasSurgery) newErrors.hasSurgery = '암 치료를 위한 수술을 받은 경험이 있는지 선택해주세요.';
     if (hasSurgery === '예' && !surgeryDate) newErrors.surgeryDate = '만약 수술 경험이 있다면, 그 날짜를 입력해주세요.';
-    if (treatmentTypes.length === 0) newErrors.treatmentTypes = '받은 치료 유형을 선택해주세요.';
-    if (treatmentTypes.includes('기타') && !otherTreatmentType) newErrors.otherTreatmentType = '기타 치료명을 입력해주세요.';
+    
+    // "아니오"를 선택하지 않았을 경우에만 치료 유형 검증
+    if (hasSurgery !== '아니오') {
+      if (treatmentTypes.length === 0) newErrors.treatmentTypes = '받은 치료 유형을 선택해주세요.';
+      if (treatmentTypes.includes('기타') && !otherTreatmentType) newErrors.otherTreatmentType = '기타 치료명을 입력해주세요.';
+    }
+    
     if (!hasRecurrence) newErrors.hasRecurrence = '암이 재발되거나 전이된 적이 있는지 선택해주세요.';
 
     // 정신 건강 정보 검증
