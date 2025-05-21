@@ -12,6 +12,7 @@ import {
   LinearProgress
 } from '@mui/material';
 import Section3Component from '../component/Section3Component';
+import { saveUserAnswers } from '../utils/firebaseUtils';
 
 const steps = [
   '암 이후 내 몸의 변화',
@@ -45,12 +46,17 @@ const Section3Page = () => {
     ? doneCount === total && answers.q15_reasons.length > 0
     : doneCount === total;
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (!ready) {
       setError(true);
       return;
     }
-    navigate('/section4', { state: { name: userName } });
+    try {
+      await saveUserAnswers(userName, answers); // 답변 저장
+      navigate('/section4', { state: { name: userName } });
+    } catch (e) {
+      alert('답변 저장에 실패했습니다.');
+    }
   };
 
   useEffect(() => {
