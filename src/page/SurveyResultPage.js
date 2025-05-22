@@ -46,12 +46,14 @@ const SurveyResultPage = () => {
   });
   console.log('meanScores:', JSON.stringify(meanScores, null, 2));
 
-  /* ★ 섹션별 원점수 평균으로 집단 분류 */
-  const riskByMean = {};
+  // ★ 섹션별 원점수 평균으로 집단 분류 (한 번만 계산)
+  const riskGroups = {};
   Object.entries(meanScores).forEach(([key, mean]) => {
-    riskByMean[key] = SurveyUtils.getRiskGroup(labelMap[key], mean);
+    riskGroups[key] = SurveyUtils.getRiskGroup(labelMap[key], mean);
   });
-  console.log('riskByMean:', JSON.stringify(riskByMean, null, 2));
+  console.log('riskGroups:', JSON.stringify(riskGroups, null, 2));
+  // 필요하다면 riskByMean 별칭으로 재활용
+  const riskByMean = riskGroups;
 
   // 4. z-score(T-score) 변환
   const stdScores = {};
@@ -60,14 +62,6 @@ const SurveyResultPage = () => {
     stdScores[key] = SurveyUtils.newScore(sectionName, mean);
   });
   console.log('stdScores:', JSON.stringify(stdScores, null, 2));
-
-  // 5. 집단 분류 (평균점수 기반!)
-  const riskGroups = {};
-  Object.entries(meanScores).forEach(([key, mean]) => {
-    const sectionName = labelMap[key];
-    riskGroups[key] = SurveyUtils.getRiskGroup(sectionName, mean);
-  });
-  console.log('riskGroups:', JSON.stringify(riskGroups, null, 2));
 
   // 6. 전체 평균 **Mean-점수** → 집단 분류 → 템플릿 문구
   const overallMean =
