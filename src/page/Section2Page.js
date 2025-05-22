@@ -64,7 +64,7 @@ const Section2Page = () => {
     setError(true);
     return;
   }
-   navigate('/section3', { state: { name: userName } });
+   navigate('/section3', { state: { name: userName, answers } });
 };
 
   useEffect(() => {

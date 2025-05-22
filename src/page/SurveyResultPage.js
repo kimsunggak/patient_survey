@@ -26,27 +26,32 @@ const sectionIds = {
 const SurveyResultPage = () => {
   const location = useLocation();
   const answers = location.state?.answers || {};
+  console.log('answers:', JSON.stringify(answers, null, 2));
 
   // 1. 역코딩 적용
   const reversed = SurveyUtils.applyReverseScore(answers);
+  console.log('reversed:', JSON.stringify(reversed, null, 2));
 
   // 2. 영역별 합계(원점수)
   const rawScores = {};
   Object.entries(sectionIds).forEach(([key, ids]) => {
     rawScores[key] = ids.reduce((sum, id) => sum + (Number(reversed[id]) || 0), 0);
   });
+  console.log('rawScores:', JSON.stringify(rawScores, null, 2));
 
   // 3. **합계 → 평균** 산출
   const meanScores = {};
   Object.entries(sectionIds).forEach(([key, ids]) => {
     meanScores[key] = rawScores[key] / ids.length;
   });
+  console.log('meanScores:', JSON.stringify(meanScores, null, 2));
 
   /* ★ 섹션별 원점수 평균으로 집단 분류 */
   const riskByMean = {};
   Object.entries(meanScores).forEach(([key, mean]) => {
     riskByMean[key] = SurveyUtils.getRiskGroup(labelMap[key], mean);
   });
+  console.log('riskByMean:', JSON.stringify(riskByMean, null, 2));
 
   // 4. z-score(T-score) 변환
   const stdScores = {};
@@ -54,6 +59,7 @@ const SurveyResultPage = () => {
     const sectionName = labelMap[key];
     stdScores[key] = SurveyUtils.newScore(sectionName, mean);
   });
+  console.log('stdScores:', JSON.stringify(stdScores, null, 2));
 
   // 5. 집단 분류 (평균점수 기반!)
   const riskGroups = {};
@@ -61,18 +67,19 @@ const SurveyResultPage = () => {
     const sectionName = labelMap[key];
     riskGroups[key] = SurveyUtils.getRiskGroup(sectionName, mean);
   });
+  console.log('riskGroups:', JSON.stringify(riskGroups, null, 2));
 
   // 6. 전체 평균 **Mean-점수** → 집단 분류 → 템플릿 문구
   const overallMean =
     Object.values(meanScores).reduce((a, b) => a + b, 0) /
     Object.values(meanScores).length;
+  console.log('overallMean:', JSON.stringify(overallMean, null, 2));
   const overallRiskGroup =
     SurveyUtils.getRiskGroup('전체 평균 (암 생존자 건강관리)', overallMean);
+  console.log('overallRiskGroup:', JSON.stringify(overallRiskGroup, null, 2));
   const overallFeedback =
     SurveyUtils.getPatientComment(overallRiskGroup);
-
-  console.log('overallRiskGroup:', overallRiskGroup);
-  console.log('overallFeedback:', overallFeedback);
+  console.log('overallFeedback:', JSON.stringify(overallFeedback, null, 2));
 
   // 7. SurveyResult에 전달
   return (
@@ -84,8 +91,8 @@ const SurveyResultPage = () => {
         riskGroups={riskGroups}
         overallFeedback={overallFeedback}
         overallRiskGroup={overallRiskGroup}
-        answers={answers}
-        riskByMean={riskByMean}          // 새로 전달
+        answers={answers} // 원본 answers도 전달하여 SurveyResult 내에서도 필요시 확인 가능
+        riskByMean={riskByMean}
       />
       <Box mt={4} display="flex" justifyContent="center">
         <Button

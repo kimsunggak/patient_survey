@@ -53,7 +53,7 @@ const Section3Page = () => {
     }
     try {
       await saveUserAnswers(userName, answers); // 답변 저장
-      navigate('/section4', { state: { name: userName } });
+      navigate('/section4', { state: { name: userName, answers } });
     } catch (e) {
       alert('답변 저장에 실패했습니다.');
     }

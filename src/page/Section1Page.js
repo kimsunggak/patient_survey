@@ -62,7 +62,7 @@ const Section1Page = () => {
     // Firebase에 사용자 답변 저장
     await saveUserAnswers(userName, updatedAnswers);
 
-    navigate('/section2', { state: { name: userName } });
+    navigate('/section2', { state: { name: userName, answers } });
   };
 
   useEffect(() => {

@@ -43,7 +43,7 @@ const Section4Page = () => {
       setError(true);
       return;
     }
-    navigate('/section5', { state: { name: userName } });
+    navigate('/section5', { state: { name: userName, answers } });
   };
 
   useEffect(() => {
