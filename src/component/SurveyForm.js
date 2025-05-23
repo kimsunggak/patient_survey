@@ -37,13 +37,13 @@ const SurveyForm = () => {
   const [otherTreatmentType, setOtherTreatmentType] = useState('');
   const [errors, setErrors] = useState({});
   const treatmentOptions = [
-    '수술',
     '방사선치료',
     '항암화학치료',
     '호르몬치료',
     '표적치료',
     '면역치료',
-    '기타'
+    '기타',
+    '없음'
   ];
 
   const handleTreatmentChange = (event) => {
@@ -75,17 +75,13 @@ const SurveyForm = () => {
     if (cancerType === '기타' && !otherCancerType) newErrors.otherCancerType = '기타 암 종류를 입력해주세요.';
     if (!cancerStage) newErrors.cancerStage = '암의 진행단계를 선택해주세요.';
     if (!otherCancerDiagnosis) newErrors.otherCancerDiagnosis = '초기 진단 받았던 암 이외에 다른 유형의 암 진단을 받으신 적이 있는지 선택해주세요.';
-    if (otherCancerDiagnosis === '예' && !otherCancerDetails) newErrors.otherCancerDetails = '만약 진단 받은 적이 있다면, 어떤 암입니까?를 입력해주세요.';
-
-    // 치료 정보 검증
+    if (otherCancerDiagnosis === '예' && !otherCancerDetails) newErrors.otherCancerDetails = '만약 진단 받은 적이 있다면, 어떤 암입니까?를 입력해주세요.';    // 치료 정보 검증
     if (!hasSurgery) newErrors.hasSurgery = '암 치료를 위한 수술을 받은 경험이 있는지 선택해주세요.';
     if (hasSurgery === '예' && !surgeryDate) newErrors.surgeryDate = '만약 수술 경험이 있다면, 그 날짜를 입력해주세요.';
     
-    // "아니오"를 선택하지 않았을 경우에만 치료 유형 검증
-    if (hasSurgery !== '아니오') {
-      if (treatmentTypes.length === 0) newErrors.treatmentTypes = '받은 치료 유형을 선택해주세요.';
-      if (treatmentTypes.includes('기타') && !otherTreatmentType) newErrors.otherTreatmentType = '기타 치료명을 입력해주세요.';
-    }
+    // 모든 경우에 치료 유형 검증
+    if (treatmentTypes.length === 0) newErrors.treatmentTypes = '받은 치료 유형을 선택해주세요.';
+    if (treatmentTypes.includes('기타') && !otherTreatmentType) newErrors.otherTreatmentType = '기타 치료명을 입력해주세요.';
     
     if (!hasRecurrence) newErrors.hasRecurrence = '암이 재발되거나 전이된 적이 있는지 선택해주세요.';
 
@@ -383,7 +379,7 @@ const SurveyForm = () => {
 
           <Grid container spacing={2} direction="column" sx={{ mt: 2 }}>
             <Grid item xs={12}>
-              <FormControl fullWidth>
+              <FormControl fullWidth error={!!errors.hasRecurrence}>
                 <InputLabel>암이 재발되거나 전이된 적이 있습니까?</InputLabel>
                 <Select 
                   value={hasRecurrence} 
@@ -393,6 +389,7 @@ const SurveyForm = () => {
                   <MenuItem value="예">예</MenuItem>
                   <MenuItem value="아니오">아니오</MenuItem>
                 </Select>
+                <FormHelperText>{errors.hasRecurrence}</FormHelperText>
               </FormControl>
             </Grid>
           </Grid>
