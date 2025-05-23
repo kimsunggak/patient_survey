@@ -15,7 +15,7 @@ import RadioButtonCheckedIcon from '@mui/icons-material/RadioButtonChecked';
 import { useNavigate } from 'react-router-dom';
 import { saveUserAnswers } from '../utils/firebaseUtils';
 
-const Section2Component = ({ name, answers, setAnswers, setValidationError }) => {
+const Section2Component = ({ name, answers, setAnswers, setValidationError, validationError }) => {
   const navigate = useNavigate();
 
   // Firestore에 저장
@@ -62,9 +62,19 @@ const Section2Component = ({ name, answers, setAnswers, setValidationError }) =>
   const handleRadio = (e) => {
     const { name: qId, value } = e.target;
 
-    // q12 문항에서 3, 4, 5를 선택하면 섹션5로 바로 이동
+    // q12 문항에서 3, 4, 5를 선택하면 섹션5로 바로 이동 (필수 체크 먼저!)
     if (qId === 'q12' && ['3', '4', '5'].includes(value)) {
       const updated = { ...answers, [qId]: value };
+      // 9,10,11 필수 체크 (updated는 방금 값 반영됨)
+      if (
+        !updated.q9 || (typeof updated.q9 === 'string' && updated.q9.trim() === '') ||
+        !updated.q10 || (typeof updated.q10 === 'string' && updated.q10.trim() === '') ||
+        !updated.q11 || (typeof updated.q11 === 'string' && updated.q11.trim() === '')
+      ) {
+        setValidationError(true);   // 경고창 띄우기
+        setAnswers(updated);        // 답변 반영만
+        return;                     // 이동 막기
+      }
       setAnswers(updated);
       localStorage.setItem('surveyAnswers', JSON.stringify(updated));
       navigate('/section5', { state: { name, fromSkip: true } });
@@ -110,6 +120,28 @@ const Section2Component = ({ name, answers, setAnswers, setValidationError }) =>
           <FormLabel component="legend" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
             {q.label}
           </FormLabel>
+          {/* 12번 문항에만 안내 문구 추가 */}
+          {q.id === 'q12' && (
+            <>
+              <Box sx={{ background: '#f5f7fa', borderRadius: 2, p: 2, mb: 1, borderLeft: '4px solid #1976d2', display: 'flex', alignItems: 'center' }}>
+                <Typography variant="body2" sx={{ color: 'text.secondary', fontWeight: 500, fontSize: '1rem' }}>
+                  <Box component="span" sx={{ fontSize: '1.2em', mr: 1 }}>※</Box>
+                  <Box component="span" sx={{ color: '#1976d2', fontWeight: 700, fontSize: '1.05em', mr: 1 }}>안내</Box>
+                  <Box component="span" sx={{ color: '#333' }}>
+                    <span role="img" aria-label="down">👇</span> <b>1번, 2번</b>을 선택하신 경우, 아래 이유 중 해당되는 항목을 모두 선택해 주세요.<br/>
+                    <span role="img" aria-label="fast-forward">⏩</span> <b>3번, 4번, 5번</b>을 선택하신 경우, <Box component="span" sx={{ color: '#1976d2', fontWeight: 600, display: 'inline' }}>26번(생활습관) 문항</Box>으로 자동 이동합니다.
+                  </Box>
+                </Typography>
+              </Box>
+              {setValidationError && typeof validationError !== 'undefined' && validationError && (
+                <Box sx={{ background: '#fff3e0', borderRadius: 2, p: 1.5, mb: 1, borderLeft: '4px solid #ff9800' }}>
+                  <Typography variant="body2" sx={{ color: '#d84315', fontWeight: 600 }}>
+                    이전 질문(9, 10, 11번)을 모두 완료해 주세요.
+                  </Typography>
+                </Box>
+              )}
+            </>
+          )}
           <RadioGroup
             name={q.id}
             value={answers[q.id] || ''}

@@ -77,6 +77,12 @@ const SurveyResult = ({
     };
   });
 
+  // 1-1) 미응답(제외)된 섹션 안내 메시지 생성
+  const allSectionKeys = ['physicalChange','healthManagement','support','psychologicalBurden','socialBurden','resilience'];
+  const answeredKeys = Object.keys(rawScores);
+  const excludedSections = allSectionKeys.filter(k => !answeredKeys.includes(k));
+  const excludedLabels = excludedSections.map(k => labelMap[k]);
+
   // 전체 점수 계산
   const totalScore = processed
     .filter((p) => p.included)
@@ -248,6 +254,12 @@ const SurveyResult = ({
               >
                 {Math.round(totalScore)}점
               </Typography>
+              {/* 미응답(제외) 섹션 안내 */}
+              {excludedLabels.length > 0 && (
+                <Typography variant="body2" sx={{ mt: 2, color: 'warning.main', fontWeight: 500 }}>
+                  {excludedLabels.join(', ')} 영역은 응답하지 않아 결과에서 제외되었습니다.
+                </Typography>
+              )}
             </Paper>
           </Box>
 

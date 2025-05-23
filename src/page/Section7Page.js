@@ -54,7 +54,8 @@ const Section7Page = () => {
       setError(true);
       return;
     }
-    navigate('/survey-result', { state: { name: userName } });
+    // navigate 호출 시 answers를 state에 포함하여 전달
+    navigate('/survey-result', { state: { name: userName, answers: answers } });
   };
 
   useEffect(() => {

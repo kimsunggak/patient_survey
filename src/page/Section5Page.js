@@ -41,7 +41,7 @@ const Section5Page = () => {
       setError(true);
       return;
     }
-    navigate('/section6', { state: { name: userName } });
+    navigate('/section6', { state: { name: userName, answers } });
   };
 
   useEffect(() => {

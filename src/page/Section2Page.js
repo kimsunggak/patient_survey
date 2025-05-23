@@ -29,27 +29,15 @@ const Section2Page = () => {
   // SurveyForm 또는 로컬스토리지에서 사용자 이름 가져오기
   const userName = state?.name || localStorage.getItem('userName') || '';
 
-  const [answers, setAnswers] = useState({
-    q9: '',
-    q10: '',
-    q11: '',
-    q12: '',
-    q12_reasons: [],
-    q13: '',
-    q13_1_1: false,
-    q13_1_2: false,
-    q13_1_3: false,
-    q13_1_4: false,
-    q13_1_5: false,
-    q13_1_6: false
-  });
+  // answers 초기값을 빈 객체로 변경
+  const [answers, setAnswers] = useState({});
   const [error, setError] = useState(false);
 
   const requiredSub12 = ['1', '2'].includes(answers.q12);
   const requiredSub13 = ['4', '5'].includes(answers.q13);
 
   const mainDone = ['q9','q10','q11'].filter(id => answers[id]).length;
-  const sub12Done = requiredSub12 && answers.q12_reasons.length > 0 ? 1 : 0;
+  const sub12Done = requiredSub12 && answers.q12_reasons?.length > 0 ? 1 : 0;
   const sub13Ids = ['q13_1_1','q13_1_2','q13_1_3','q13_1_4','q13_1_5','q13_1_6'];
   const sub13Done = requiredSub13 ? sub13Ids.filter(id => answers[id]).length : 0;
   const doneCount = mainDone + sub12Done + sub13Done;
@@ -60,12 +48,22 @@ const Section2Page = () => {
   const currentStep = 1;
 
   const handleNext = () => {
-  if (doneCount < totalCount) {
-    setError(true);
-    return;
-  }
-   navigate('/section3', { state: { name: userName } });
-};
+    // 9, 10, 11번 필수 체크 (undefined, 빈 문자열, 공백 모두 막기)
+    if (
+      !answers.q9 || (typeof answers.q9 === 'string' && answers.q9.trim() === '') ||
+      !answers.q10 || (typeof answers.q10 === 'string' && answers.q10.trim() === '') ||
+      !answers.q11 || (typeof answers.q11 === 'string' && answers.q11.trim() === '')
+    ) {
+      setError(true);
+      return;
+    }
+    // 기존의 추가 조건(서브질문 등)도 그대로 유지
+    if (doneCount < totalCount) {
+      setError(true);
+      return;
+    }
+    navigate('/section3', { state: { name: userName, answers } });
+  };
 
   useEffect(() => {
     if (doneCount === totalCount) setError(false);
@@ -124,6 +122,7 @@ const Section2Page = () => {
           answers={answers}
           setAnswers={setAnswers}
           setValidationError={setError}
+          validationError={error}
         />
 
         {error && (
