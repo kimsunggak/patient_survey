@@ -368,6 +368,28 @@ const domainStats = {
   resilience: { mean: 4.28, sd: 0.72 }
 };
 
+// 생년월일을 연-월-일 형식으로 포맷하는 함수
+const formatBirthDate = (birthDate) => {
+  if (!birthDate) return '정보 없음';
+  
+  // 이미 포맷된 문자열인 경우 (YYYY-MM-DD)
+  if (typeof birthDate === 'string' && birthDate.includes('-')) {
+    return birthDate;
+  }
+  
+  // Date 객체인 경우
+  if (birthDate instanceof Date) {
+    return birthDate.toISOString().split('T')[0];
+  }
+  
+  // Firestore Timestamp인 경우
+  if (birthDate && typeof birthDate.toDate === 'function') {
+    return birthDate.toDate().toISOString().split('T')[0];
+  }
+  
+  return '정보 없음';
+};
+
 function DashboardPage() {
   const [patients, setPatients] = useState([]);
   const [filteredPatients, setFilteredPatients] = useState([]);
@@ -611,6 +633,8 @@ function DashboardPage() {
     }
     
     setFilteredPatients(filtered);
+    // 필터링이 변경될 때마다 첫 번째 페이지로 리셋
+    setCurrentPage(1);
   }, [filters, patients]);
   
   // 필터 변경 핸들러
@@ -806,7 +830,7 @@ function DashboardPage() {
                     <HeaderCell>ID</HeaderCell>
                     <HeaderCell>이름</HeaderCell>
                     <HeaderCell>암 종류</HeaderCell>
-                    <HeaderCell>치료 상태</HeaderCell>
+                    <HeaderCell>생년월일</HeaderCell>
                     <HeaderCell>진단 시기</HeaderCell>
                     <HeaderCell>위험도</HeaderCell>
                     <HeaderCell>상담 기록</HeaderCell>
@@ -835,7 +859,7 @@ function DashboardPage() {
                             {patient.cancerType}
                           </TableCell>
                           <TableCell>
-                            {patient.currentTreatment}
+                            {formatBirthDate(patient.birthDate)}
                           </TableCell>
                           <TableCell>
                             {patient.diagnosisDate || '정보 없음'}
