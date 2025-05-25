@@ -455,6 +455,95 @@ const ScoreBadge = styled.div`
   color: #2a5e8c;
 `;
 
+// 피드백 컨테이너
+const FeedbackContainer = styled.div`
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-left: 4px solid #2a5e8c;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+`;
+
+// 피드백 제목
+const FeedbackTitle = styled.h3`
+  color: #2a5e8c;
+  font-size: 1.2rem;
+  margin: 0 0 1.5rem 0;
+  display: flex;
+  align-items: center;
+  font-weight: 600;
+  
+  &::before {
+    content: "💬";
+    margin-right: 0.5rem;
+    font-size: 1.1rem;
+  }
+`;
+
+// 피드백 섹션
+const FeedbackSection = styled.div`
+  background: white;
+  border-radius: 8px;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+  border: 1px solid #e9ecef;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+`;
+
+// 피드백 섹션 제목
+const FeedbackSectionTitle = styled.h4`
+  color: #495057;
+  font-size: 1rem;
+  margin: 0 0 0.75rem 0;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  
+  &::before {
+    content: ${props => props.type === 'overall' ? '"📊"' : '"💡"'};
+    margin-right: 0.5rem;
+    font-size: 0.9rem;
+  }
+`;
+
+// 피드백 내용
+const FeedbackContent = styled.div`
+  color: #495057;
+  line-height: 1.6;
+  font-size: 0.95rem;
+  white-space: pre-line;
+  
+  p {
+    margin: 0 0 0.75rem 0;
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+`;
+
+// 피드백 없음 상태
+const NoFeedbackState = styled.div`
+  text-align: center;
+  padding: 2rem;
+  color: #6c757d;
+  background: white;
+  border-radius: 8px;
+  border: 2px dashed #dee2e6;
+  
+  &::before {
+    content: "📝";
+    display: block;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+`;
+
 // 상담 요청 상태를 한글로 변환
 const getRequestStatusText = (status) => {
   const statuses = {
@@ -600,7 +689,7 @@ function PatientDetailPage() {
           // 설문 데이터가 없는 경우 기존 로직으로 대체
           if (userData.mentalHealthHistory && userData.mentalHealthHistory !== "아니오") {
             riskLevel = 'high';
-          } else if (userData.physicalLimitations) {
+          } else if (userData.mentalHealthImpact) {
             riskLevel = 'medium';
           }
         }
@@ -624,19 +713,61 @@ function PatientDetailPage() {
           smokingCessation = q33Score >= 3 ? '예' : '아니오';
         }
         
+        // 정신건강 진단명들을 문자열로 변환
+        let mentalHealthDiagnosesText = '없음';
+        if (userData.mentalHealthDiagnoses) {
+          const diagnoses = [];
+          if (userData.mentalHealthDiagnoses.depression) diagnoses.push('우울증');
+          if (userData.mentalHealthDiagnoses.anxietyDisorder) diagnoses.push('불안장애');
+          if (userData.mentalHealthDiagnoses.schizophrenia) diagnoses.push('조현병');
+          if (userData.mentalHealthDiagnoses.other) diagnoses.push('기타');
+          
+          if (diagnoses.length > 0) {
+            mentalHealthDiagnosesText = diagnoses.join(', ');
+          }
+        }
+        
+        // 생년월일로부터 나이 계산
+        const calculateAge = (birthDate) => {
+          if (!birthDate) return null;
+          
+          const today = new Date();
+          const birth = new Date(birthDate);
+          
+          if (isNaN(birth.getTime())) return null;
+          
+          let age = today.getFullYear() - birth.getFullYear();
+          const monthDiff = today.getMonth() - birth.getMonth();
+          
+          if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+            age--;
+          }
+          
+          return age;
+        };
+        
+        const calculatedAge = calculateAge(userData.birthDate);
+        
         const patientData = {
           id: patientDocSnap.id,
           name: userData.name || '익명',
-          age: userData.age || '',
           gender: userData.gender || '',
-          cancerType: userData.cancerType || '',
-          currentTreatment: userData.currentTreatment || '',
-          diagnosisDate: userData.diagnosisDate || '',
           birthDate: userData.birthDate || '',
-          mentalHealthHistory: userData.mentalHealthHistory || '',
-          physicalLimitations: userData.physicalLimitations || '',
-          treatmentTypes: userData.treatmentTypes || [],
+          age: calculatedAge,
+          maritalStatus: userData.maritalStatus || '',
+          cancerType: userData.cancerType || '',
+          cancerStage: userData.cancerStage || '',
+          diagnosisDate: userData.diagnosisDate || '',
+          hasRecurrence: userData.hasRecurrence || '',
+          hasSurgery: userData.hasSurgery || '',
+          surgeryDate: userData.surgeryDate || '',
+          otherCancerDiagnosis: userData.otherCancerDiagnosis || '',
           otherCancerType: userData.otherCancerType || '',
+          otherCancerDetails: userData.otherCancerDetails || '',
+          mentalHealthHistory: userData.mentalHealthHistory || '',
+          mentalHealthDiagnoses: mentalHealthDiagnosesText,
+          otherMentalDiagnosis: userData.otherMentalDiagnosis || '',
+          mentalHealthImpact: userData.mentalHealthImpact || '',
           otherTreatmentType: userData.otherTreatmentType || '',
           alcoholAbstinence: alcoholAbstinence,  // 절주 여부 추가
           smokingCessation: smokingCessation,    // 금연 여부 추가
@@ -1032,8 +1163,8 @@ function PatientDetailPage() {
               <CardTitle>환자 기본 정보</CardTitle>
               <InfoGrid>
                 <InfoGroup>
-                  <InfoLabel>나이</InfoLabel>
-                  <InfoValue>{patient.age || '정보 없음'}</InfoValue>
+                  <InfoLabel>이름</InfoLabel>
+                  <InfoValue>{patient.name || '정보 없음'}</InfoValue>
                 </InfoGroup>
                 <InfoGroup>
                   <InfoLabel>성별</InfoLabel>
@@ -1044,43 +1175,81 @@ function PatientDetailPage() {
                   <InfoValue>{patient.birthDate || '정보 없음'}</InfoValue>
                 </InfoGroup>
                 <InfoGroup>
-                  <InfoLabel>암 종류</InfoLabel>
-                  <InfoValue>
-                    {patient.cancerType}
-                    {patient.otherCancerType && ` (${patient.otherCancerType})`}
-                  </InfoValue>
+                  <InfoLabel>나이</InfoLabel>
+                  <InfoValue>{patient.age !== null ? `${patient.age}세` : '계산 불가'}</InfoValue>
                 </InfoGroup>
                 <InfoGroup>
-                  <InfoLabel>진단 시기</InfoLabel>
+                  <InfoLabel>결혼 상태</InfoLabel>
+                  <InfoValue>{patient.maritalStatus || '정보 없음'}</InfoValue>
+                </InfoGroup>
+                <InfoGroup>
+                  <InfoLabel>암 종류</InfoLabel>
+                  <InfoValue>{patient.cancerType || '정보 없음'}</InfoValue>
+                </InfoGroup>
+                <InfoGroup>
+                  <InfoLabel>암 병기</InfoLabel>
+                  <InfoValue>{patient.cancerStage || '정보 없음'}</InfoValue>
+                </InfoGroup>
+                <InfoGroup>
+                  <InfoLabel>진단일</InfoLabel>
                   <InfoValue>{patient.diagnosisDate || '정보 없음'}</InfoValue>
                 </InfoGroup>
                 <InfoGroup>
-                  <InfoLabel>현재 치료 상태</InfoLabel>
-                  <InfoValue>{patient.currentTreatment || '정보 없음'}</InfoValue>
+                  <InfoLabel>재발 여부</InfoLabel>
+                  <InfoValue>{patient.hasRecurrence || '정보 없음'}</InfoValue>
                 </InfoGroup>
                 <InfoGroup>
-                  <InfoLabel>치료 방법</InfoLabel>
-                  {patient.treatmentTypes && patient.treatmentTypes.length > 0 ? (
-                    <TreatmentTagsContainer>
-                      {patient.treatmentTypes.map((treatment, index) => (
-                        <TreatmentTag key={index}>{treatment}</TreatmentTag>
-                      ))}
-                      {patient.otherTreatmentType && (
-                        <TreatmentTag>{patient.otherTreatmentType}</TreatmentTag>
-                      )}
-                    </TreatmentTagsContainer>
-                  ) : (
-                    <InfoValue>정보 없음</InfoValue>
-                  )}
+                  <InfoLabel>수술 여부</InfoLabel>
+                  <InfoValue>{patient.hasSurgery || '정보 없음'}</InfoValue>
                 </InfoGroup>
+                {patient.surgeryDate && (
+                  <InfoGroup>
+                    <InfoLabel>수술일</InfoLabel>
+                    <InfoValue>{patient.surgeryDate}</InfoValue>
+                  </InfoGroup>
+                )}
                 <InfoGroup>
-                  <InfoLabel>신체적 제한</InfoLabel>
-                  <InfoValue>{patient.physicalLimitations || '없음'}</InfoValue>
+                  <InfoLabel>다른 암 진단 여부</InfoLabel>
+                  <InfoValue>{patient.otherCancerDiagnosis || '정보 없음'}</InfoValue>
                 </InfoGroup>
+                {patient.otherCancerType && (
+                  <InfoGroup>
+                    <InfoLabel>다른 암 종류</InfoLabel>
+                    <InfoValue>{patient.otherCancerType}</InfoValue>
+                  </InfoGroup>
+                )}
+                {patient.otherCancerDetails && (
+                  <InfoGroup>
+                    <InfoLabel>다른 암 상세 정보</InfoLabel>
+                    <InfoValue>{patient.otherCancerDetails}</InfoValue>
+                  </InfoGroup>
+                )}
                 <InfoGroup>
                   <InfoLabel>정신 건강력</InfoLabel>
-                  <InfoValue>{patient.mentalHealthHistory || '없음'}</InfoValue>
+                  <InfoValue>{patient.mentalHealthHistory || '정보 없음'}</InfoValue>
                 </InfoGroup>
+                <InfoGroup>
+                  <InfoLabel>정신건강 진단명</InfoLabel>
+                  <InfoValue>{patient.mentalHealthDiagnoses || '없음'}</InfoValue>
+                </InfoGroup>
+                {patient.otherMentalDiagnosis && (
+                  <InfoGroup>
+                    <InfoLabel>기타 정신건강 진단</InfoLabel>
+                    <InfoValue>{patient.otherMentalDiagnosis}</InfoValue>
+                  </InfoGroup>
+                )}
+                {patient.mentalHealthImpact && (
+                  <InfoGroup>
+                    <InfoLabel>정신건강 영향</InfoLabel>
+                    <InfoValue>{patient.mentalHealthImpact}</InfoValue>
+                  </InfoGroup>
+                )}
+                {patient.otherTreatmentType && (
+                  <InfoGroup>
+                    <InfoLabel>기타 치료법</InfoLabel>
+                    <InfoValue>{patient.otherTreatmentType}</InfoValue>
+                  </InfoGroup>
+                )}
                 <InfoGroup>
                   <InfoLabel>절주 여부</InfoLabel>
                   <InfoValue>{patient.alcoholAbstinence || '정보 없음'}</InfoValue>
@@ -1240,6 +1409,44 @@ function PatientDetailPage() {
         
         {activeTab === 'counseling' && (
           <>
+            {/* 설문 결과 피드백 섹션 */}
+            <Card>
+              <CardTitle>환자 설문 결과 피드백</CardTitle>
+              {(!patient || (!surveyData || (!surveyData.overallFeedback && !surveyData.additionalFeedback))) ? (
+                <NoFeedbackState>
+                  아직 설문 결과 피드백이 없습니다.
+                  <br />
+                  환자가 설문을 완료하면 피드백이 표시됩니다.
+                </NoFeedbackState>
+              ) : (
+                <FeedbackContainer>
+                  <FeedbackTitle>제공된 건강 관리 가이드</FeedbackTitle>
+                  
+                  {surveyData.overallFeedback && (
+                    <FeedbackSection>
+                      <FeedbackSectionTitle type="overall">
+                        종합 평가 및 권장사항
+                      </FeedbackSectionTitle>
+                      <FeedbackContent>
+                        {surveyData.overallFeedback}
+                      </FeedbackContent>
+                    </FeedbackSection>
+                  )}
+                  
+                  {surveyData.additionalFeedback && (
+                    <FeedbackSection>
+                      <FeedbackSectionTitle type="additional">
+                        추가 조언 및 참고사항
+                      </FeedbackSectionTitle>
+                      <FeedbackContent>
+                        {surveyData.additionalFeedback}
+                      </FeedbackContent>
+                    </FeedbackSection>
+                  )}
+                </FeedbackContainer>
+              )}
+            </Card>
+            
             <Card>
               <CardTitle>상담 노트 작성</CardTitle>
               <NoteForm onSubmit={handleAddNote}>
@@ -1276,7 +1483,7 @@ function PatientDetailPage() {
                             <NoteActionButton delete onClick={() => handleDeleteNote(note.id)}>
                               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <polyline points="3 6 5 6 21 6"></polyline>
-                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2 2h4a2 2 0 0 1 2 2v2"></path>
                                 <line x1="10" y1="11" x2="10" y2="17"></line>
                                 <line x1="14" y1="11" x2="14" y2="17"></line>
                               </svg>
