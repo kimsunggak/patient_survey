@@ -377,10 +377,27 @@ const ScoreValue = styled.div`
   font-size: 1.8rem;
   font-weight: 700;
   color: ${props => {
+    if (props.score === null) return '#6c757d';
     if (props.score >= 50) return '#28a745';
     if (props.score >= 40) return '#ffc107';
     return '#dc3545';
   }};
+`;
+
+// 빈 점수 표시를 위한 스타일
+const EmptyScore = styled.div`
+  font-size: 1.2rem;
+  color: #6c757d;
+  font-style: italic;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  &::before {
+    content: "—";
+    font-size: 2rem;
+    font-style: normal;
+  }
 `;
 
 // 스코어카드 라벨
@@ -555,7 +572,7 @@ const getRequestStatusText = (status) => {
   return statuses[status] || '알 수 없음';
 };
 
-// 영역별 평균 및 표준편차 정보
+// 영역별 평균 및 표준편차 정보 (더 이상 사용하지 않지만 기존 코드와의 호환성을 위해 유지)
 const domainStats = {
   physical: { mean: 3.09, sd: 0.95 },
   selfcare: { mean: 3.63, sd: 0.76 },
@@ -580,12 +597,12 @@ function PatientDetailPage() {
   const [error, setError] = useState(null);
   const [surveyData, setSurveyData] = useState(null);
   const [categoryScores, setCategoryScores] = useState({
-    physical: { title: '신체적 상태', score: 0, newScore: 50, questions: [1, 2, 3, 4, 5, 6, 7, 8] },
-    selfcare: { title: '건강 관리', score: 0, newScore: 50, questions: [9, 10, 11, 12, 13] },
-    support: { title: '사회적 지지', score: 0, newScore: 50, questions: [14, 15, 16, 17] },
-    psychological: { title: '심리적 부담', score: 0, newScore: 50, questions: [18, 19, 20, 21, 22, 23, 24, 25] },
-    social: { title: '사회적 부담', score: 0, newScore: 50, questions: [26, 27, 28] },
-    resilience: { title: '회복 탄력성', score: 0, newScore: 50, questions: [29, 30, 31] }
+    physicalChange: { title: '신체적 변화', score: 0 },
+    healthManagement: { title: '건강 관리', score: 0 },
+    socialSupport: { title: '사회적 지지', score: 0 },
+    psychologicalBurden: { title: '심리적 부담', score: 0 },
+    socialBurden: { title: '사회적 부담', score: 0 },
+    resilience: { title: '회복 탄력성', score: 0 }
   });
   
   // URL에서 탭 파라미터를 읽어와서 초기 탭 설정
@@ -622,68 +639,28 @@ function PatientDetailPage() {
         let riskLevel = 'low'; // 기본값은 양호
         
         // 설문 데이터가 있는 경우에만 newScore 기반 위험도 계산
-        if (userData.answers) {
-          // 모든 카테고리의 평균 newScore 계산을 위한 준비
-          const categoryQuestions = {
-            physical: [1, 2, 3, 4, 5, 6, 7, 8],
-            selfcare: [9, 10, 11, 12, 13],
-            support: [14, 15, 16, 17],
-            psychological: [18, 19, 20, 21, 22, 23, 24, 25],
-            social: [26, 27, 28],
-            resilience: [29, 30, 31]
-          };
+        if (userData.surveyResults && userData.surveyResults.length > 0 && userData.surveyResults[0].stdScores) {
+          const stdScores = userData.surveyResults[0].stdScores;
           
-          // 각 카테고리별 newScore 계산
-          const categoryNewScores = {};
-          let totalNewScore = 0;
-          let categoriesWithScores = 0;
-          
-          Object.entries(categoryQuestions).forEach(([category, questions]) => {
-            let totalScore = 0;
-            let answeredQuestions = 0;
-            
-            questions.forEach(questionNum => {
-              const answerKey = `q${questionNum}`;
-              if (userData.answers[answerKey]) {
-                // 역코딩이 필요한 문항 처리 (일부 질문은 점수가 높을수록 부정적)
-                const needsReverseScoring = [1, 2, 3, 4, 5, 6, 7, 8, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28];
-                const score = parseInt(userData.answers[answerKey]);
-                
-                if (needsReverseScoring.includes(questionNum)) {
-                  // 역코딩 (1->5, 2->4, 3->3, 4->2, 5->1)
-                  totalScore += (6 - score); 
-                } else {
-                  totalScore += score;
-                }
-                answeredQuestions++;
-              }
-            });
-            
-            // 5점 척도 평균 점수
-            const scaleScore = answeredQuestions > 0 ? totalScore / answeredQuestions : 0;
-            
-            // NewScore 계산 (Z 점수 기반)
-            if (answeredQuestions > 0 && domainStats[category]) {
-              // Z 점수 계산
-              const zScore = (scaleScore - domainStats[category].mean) / domainStats[category].sd;
-              // NewScore 계산: (Z점수 * 16.67) + 50
-              const newScore = Math.round((zScore * 16.67) + 50);
-              categoryNewScores[category] = newScore;
-              totalNewScore += newScore;
-              categoriesWithScores++;
+          // 모든 유효한 점수들의 평균 계산
+          const validScores = [];
+          Object.values(stdScores).forEach(score => {
+            if (typeof score === 'number' && !isNaN(score)) {
+              validScores.push(score);
             }
           });
           
-          // 전체 평균 newScore 계산
-          const averageNewScore = categoriesWithScores > 0 ? totalNewScore / categoriesWithScores : 0;
-          
-          // 평균 newScore 기준으로 위험도 결정
-          if (averageNewScore < 40) {
-            riskLevel = 'high'; // 40점 미만은 위험
-          } else if (averageNewScore < 50) {
-            riskLevel = 'medium'; // 40~49점은 주의
-          } else {
-            riskLevel = 'low'; // 50점 이상은 양호
+          if (validScores.length > 0) {
+            const averageScore = validScores.reduce((sum, score) => sum + score, 0) / validScores.length;
+            
+            // 평균 점수 기준으로 위험도 결정
+            if (averageScore < 40) {
+              riskLevel = 'high'; // 40점 미만은 위험
+            } else if (averageScore < 50) {
+              riskLevel = 'medium'; // 40~49점은 주의
+            } else {
+              riskLevel = 'low'; // 50점 이상은 양호
+            }
           }
         } else {
           // 설문 데이터가 없는 경우 기존 로직으로 대체
@@ -776,55 +753,38 @@ function PatientDetailPage() {
         
         setPatient(patientData);
         
-        if (userData.answers) {
-          setSurveyData(userData.answers);
+        if (userData.surveyResults && userData.surveyResults.length > 0 && userData.surveyResults[0].stdScores) {
+          setSurveyData(userData.answers || {});
           
-          // 카테고리별 점수 계산
-          const updatedCategoryScores = {...categoryScores};
+          const stdScores = userData.surveyResults[0].stdScores;
           
-          // 각 카테고리별 점수 계산
-          Object.keys(updatedCategoryScores).forEach(category => {
-            const categoryData = updatedCategoryScores[category];
-            let totalScore = 0;
-            let answeredQuestions = 0;
-            
-            categoryData.questions.forEach(questionNum => {
-              const answerKey = `q${questionNum}`;
-              if (userData.answers[answerKey]) {
-                // 역코딩이 필요한 문항 처리 (일부 질문은 점수가 높을수록 부정적)
-                const needsReverseScoring = [1, 2, 3, 4, 5, 6, 7, 8, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28];
-                const score = parseInt(userData.answers[answerKey]);
-                
-                if (needsReverseScoring.includes(questionNum)) {
-                  // 역코딩 (1->5, 2->4, 3->3, 4->2, 5->1)
-                  totalScore += (6 - score); 
-                } else {
-                  totalScore += score;
-                }
-                answeredQuestions++;
-              }
-            });
-            
-            // 백분율 계산 (역코딩 처리 후)
-            const maxPossibleScore = answeredQuestions * 5; // 모든 질문에 5점을 받았을 경우
-            const percent = answeredQuestions > 0 ? Math.round((totalScore / maxPossibleScore) * 100) : 0;
-            
-            // 5점 척도 평균 점수
-            const scaleScore = answeredQuestions > 0 ? totalScore / answeredQuestions : 0;
-            
-            // NewScore 계산 (Z 점수 기반)
-            let newScore = 50; // 기본값
-            if (answeredQuestions > 0 && domainStats[category]) {
-              // Z 점수 계산
-              const zScore = (scaleScore - domainStats[category].mean) / domainStats[category].sd;
-              // NewScore 계산: (Z점수 * 16.67) + 50
-              newScore = Math.round((zScore * 16.67) + 50);
+          // 카테고리별 점수 설정 (디비에서 직접 가져온 점수 사용)
+          const updatedCategoryScores = {
+            physicalChange: { 
+              title: '신체적 변화', 
+              score: typeof stdScores.physicalChange === 'number' ? stdScores.physicalChange : null 
+            },
+            healthManagement: { 
+              title: '건강 관리', 
+              score: typeof stdScores.healthManagement === 'number' ? stdScores.healthManagement : null 
+            },
+            socialSupport: { 
+              title: '사회적 지지', 
+              score: typeof stdScores.socialSupport === 'number' ? stdScores.socialSupport : null 
+            },
+            psychologicalBurden: { 
+              title: '심리적 부담', 
+              score: typeof stdScores.psychologicalBurden === 'number' ? stdScores.psychologicalBurden : null 
+            },
+            socialBurden: { 
+              title: '사회적 부담', 
+              score: typeof stdScores.socialBurden === 'number' ? stdScores.socialBurden : null 
+            },
+            resilience: { 
+              title: '회복 탄력성', 
+              score: typeof stdScores.resilience === 'number' ? stdScores.resilience : null 
             }
-            
-            updatedCategoryScores[category].score = totalScore;
-            updatedCategoryScores[category].percent = percent;
-            updatedCategoryScores[category].newScore = newScore;
-          });
+          };
           
           setCategoryScores(updatedCategoryScores);
         }
@@ -998,7 +958,7 @@ function PatientDetailPage() {
     datasets: [
       {
         label: '취득 점수',
-        data: Object.values(categoryScores).map(cat => cat.newScore),
+        data: Object.values(categoryScores).map(cat => cat.score !== null ? cat.score : 0),
         backgroundColor: 'rgba(42, 94, 140, 0.2)',
         borderColor: 'rgba(42, 94, 140, 1)',
         borderWidth: 2,
@@ -1030,12 +990,12 @@ function PatientDetailPage() {
     datasets: [
       {
         label: '취득 점수',
-        data: Object.values(categoryScores).map(cat => cat.newScore),
+        data: Object.values(categoryScores).map(cat => cat.score !== null ? cat.score : 0),
         backgroundColor: 'rgba(42, 94, 140, 0.7)',
       },
       {
         label: '평균 점수',
-        data: [41, 54, 60, 40, 48, 71], // NewScore 기준값
+        data: [41, 54, 60, 40, 48, 71], // 기준 평균값
         backgroundColor: 'rgba(220, 220, 220, 0.7)',
       }
     ]
@@ -1077,7 +1037,8 @@ function PatientDetailPage() {
   };
   
   // NewScore 평가
-  const getNewScoreLevel = (score) => {
+  const getScoreLevel = (score) => {
+    if (score === null) return "대상외";
     if (score >= 50) return "양호";
     if (score >= 40) return "보통";
     return "주의";
@@ -1308,10 +1269,14 @@ function PatientDetailPage() {
                 {Object.entries(categoryScores).map(([key, data]) => (
                   <ScoreCard key={key}>
                     <ScoreLabel>{data.title}</ScoreLabel>
-                    <ScoreValue score={data.newScore}>
-                      {data.newScore}
-                    </ScoreValue>
-                    <InfoLabel>{getNewScoreLevel(data.newScore)}</InfoLabel>
+                    {data.score !== null ? (
+                      <ScoreValue score={data.score}>
+                        {data.score}
+                      </ScoreValue>
+                    ) : (
+                      <EmptyScore />
+                    )}
+                    <InfoLabel>{getScoreLevel(data.score)}</InfoLabel>
                   </ScoreCard>
                 ))}
               </ScoreCardsContainer>
