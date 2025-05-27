@@ -21,7 +21,7 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Router>
+      <Router basename="/patient_survey/web1">
         <Routes>
           {/* 메인 화면 */}
           <Route path="/" element={<Home />} />
