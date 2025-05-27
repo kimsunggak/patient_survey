@@ -1,5 +1,6 @@
 // src/App.js
 import React from 'react';
+// BrowserRouter를 web2와 일관되게 유지
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import theme from './theme';
@@ -21,7 +22,7 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Router>
+      <Router basename="/patient_survey/web1">
         <Routes>
           {/* 메인 화면 */}
           <Route path="/" element={<Home />} />
@@ -37,7 +38,7 @@ function App() {
           <Route path="/section7" element={<Section7Page />} />
 
           {/* 설문 결과 페이지 */}
-+         <Route path="/survey-result" element={<SurveyResultPage />} />
+          <Route path="/survey-result" element={<SurveyResultPage />} />
         </Routes>
       </Router>
     </ThemeProvider>
