@@ -33,7 +33,7 @@ Chart.register(
 const labelMap = {
   physicalChange: '암 이후 내 몸의 변화',
   healthManagement: '건강한 삶을 위한 관리',
-  support: '회복을 도와주는 사람들',
+  socialSupport: '회복을 도와주는 사람들',
   psychologicalBurden: '심리적 부담',
   socialBurden: '사회적 삶의 부담',
   resilience: '암 이후 탄력성',
@@ -42,7 +42,7 @@ const labelMap = {
 const maxScores = {
   physicalChange: 40,
   healthManagement: 25,
-  support: 20,
+  socialSupport: 20,
   psychologicalBurden: 40,
   socialBurden: 15,
   resilience: 25,
@@ -58,8 +58,7 @@ const SurveyResult = ({
   overallRiskGroup = "",
   answers = {},
   riskByMean = {}
-}) => {
-  // 1) 데이터 전처리 - 실제 응답이 있는 섹션만 포함
+}) => {  // 1) 데이터 전처리 - 실제 응답이 있는 섹션만 포함
   const processed = Object.keys(rawScores)
     .filter(key => typeof meanScores[key] === 'number' && !isNaN(meanScores[key])) // 응답이 있는 섹션만
     .map((key) => {
@@ -67,19 +66,22 @@ const SurveyResult = ({
       const mean = meanScores[key];
       const included = key !== 'lifestyle';
       const sectionName = labelMap[key];
+      // stdScores 프롭에서 직접 가져오고, 숫자가 아닌 경우 0으로 처리
+      const stdScore = included && typeof stdScores[key] === 'number' && !isNaN(stdScores[key]) 
+        ? stdScores[key] 
+        : 0;
       return {
         key,
         label: sectionName,
         value,
         mean,
         max: maxScores[key],
-        stdScore: included ? SurveyUtils.newScore(sectionName, mean) : 0,
+        stdScore: stdScore,
         level: included ? SurveyUtils.getRiskGroup(sectionName, mean) : '저위험집단',
         included
       };
-    });
-  // 1-1) 미응답(제외)된 섹션 안내 메시지 생성
-  const allSectionKeys = ['physicalChange','healthManagement','support','psychologicalBurden','socialBurden','resilience'];
+    });// 1-1) 미응답(제외)된 섹션 안내 메시지 생성
+  const allSectionKeys = ['physicalChange','healthManagement','socialSupport','psychologicalBurden','socialBurden','resilience'];
   const answeredKeys = processed.map(p => p.key); // 실제 응답이 있는 섹션들
   const excludedSections = allSectionKeys.filter(k => !answeredKeys.includes(k));
   const excludedLabels = excludedSections.map(k => labelMap[k]);

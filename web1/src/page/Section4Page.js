@@ -37,13 +37,12 @@ const Section4Page = () => {
   ].filter(id => answers[id]).length;
   const progress = (done / total) * 100;
   const currentStep = 3;
-
   const handleNext = () => {
     if (done < total) {
       setError(true);
       return;
     }
-    navigate('/section6', { state: { name: userName, answers } });
+    navigate('/section5', { state: { name: userName, answers } });
   };
 
   useEffect(() => {
