@@ -32,14 +32,14 @@ export const SectionStats =  {
 // 점수 변환 함수
 export function newScore(sectionName, userScore) {
     const stat = SectionStats[sectionName];
-    if (!stat) return null;
+    if (!stat || typeof userScore !== 'number' || isNaN(userScore)) return null;
     const z_score = (userScore - stat.mean) / stat.sd;
     return Math.round((z_score * 16.67) + 50);
 }
 // 점수별 집단 분류 함수
 export function getRiskGroup(sectionName, meanScore) {
     const stat = SectionStats[sectionName];
-    if (!stat) return null;
+    if (!stat || typeof meanScore !== 'number' || isNaN(meanScore)) return null;
     // 섹션별 점수 지표 가져와서 cut-off score 계산
     const cutoff = stat.mean - stat.sd;
     if (meanScore <= cutoff) return "고위험집단";

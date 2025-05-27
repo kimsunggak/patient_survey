@@ -53,33 +53,34 @@ const SurveyResult = ({
   rawScores = {},
   meanScores = {},
   stdScores = {},
-  riskGroups = {},
+    riskGroups = {},
   overallFeedback = "",
   overallRiskGroup = "",
   answers = {},
   riskByMean = {}
 }) => {
-  // 1) 데이터 전처리
-  const processed = Object.keys(rawScores).map((key) => {
-    const value = rawScores[key] ?? 0;
-    const mean = meanScores[key] ?? 0;
-    const included = key !== 'lifestyle';
-    const sectionName = labelMap[key];
-    return {
-      key,
-      label: sectionName,
-      value,
-      mean,
-      max: maxScores[key],
-      stdScore: included ? SurveyUtils.newScore(sectionName, mean) : 0,
-      level: included ? SurveyUtils.getRiskGroup(sectionName, mean) : '저위험집단',
-      included
-    };
-  });
-
+  // 1) 데이터 전처리 - 실제 응답이 있는 섹션만 포함
+  const processed = Object.keys(rawScores)
+    .filter(key => typeof meanScores[key] === 'number' && !isNaN(meanScores[key])) // 응답이 있는 섹션만
+    .map((key) => {
+      const value = rawScores[key] ?? 0;
+      const mean = meanScores[key];
+      const included = key !== 'lifestyle';
+      const sectionName = labelMap[key];
+      return {
+        key,
+        label: sectionName,
+        value,
+        mean,
+        max: maxScores[key],
+        stdScore: included ? SurveyUtils.newScore(sectionName, mean) : 0,
+        level: included ? SurveyUtils.getRiskGroup(sectionName, mean) : '저위험집단',
+        included
+      };
+    });
   // 1-1) 미응답(제외)된 섹션 안내 메시지 생성
   const allSectionKeys = ['physicalChange','healthManagement','support','psychologicalBurden','socialBurden','resilience'];
-  const answeredKeys = Object.keys(rawScores);
+  const answeredKeys = processed.map(p => p.key); // 실제 응답이 있는 섹션들
   const excludedSections = allSectionKeys.filter(k => !answeredKeys.includes(k));
   const excludedLabels = excludedSections.map(k => labelMap[k]);
 
